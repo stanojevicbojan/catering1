@@ -2,10 +2,13 @@ import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, KeyboardAvoidingView, TextInput, Keyboard, Animated } from 'react-native';
 import { AntDesign, Ionicons } from '@expo/vector-icons'
 import colors from '../Colors'
+import NumericInput from 'react-native-numeric-input'
+import { SwipeListView } from 'react-native-swipe-list-view';
 
-export default class TodoModal extends React.Component {
+export default class MenuModal extends React.Component {
     state = {
-        newTodo: ""
+        newTodo: "",
+        value: 0,
     }
 
     toggleTodoCompleted = index => {
@@ -36,9 +39,10 @@ export default class TodoModal extends React.Component {
     renderTodo = (todo, index) => {
         return (
                 <View style={styles.todoContainer}>
-                    <TouchableOpacity onPress={() => this.toggleTodoCompleted(index)}>
+
+                   {/* <TouchableOpacity onPress={() => this.toggleTodoCompleted(index)}>
                             <Ionicons name={todo.completed? 'ios-square' : 'ios-square-outline'} size={24} color={colors.gray} />
-                    </TouchableOpacity>
+        </TouchableOpacity>*/}
                     <Text style={[styles.todo, {
                             textDecorationLine: todo.completed ? 'line-through' : "none", 
                             color: todo.completed ? colors.gray : colors.black}]}>{todo.title
@@ -61,10 +65,10 @@ export default class TodoModal extends React.Component {
       const completedCount = list.todos.filter(todo => todo.completed).length
 
     return (
-        <KeyboardAvoidingView style={{flex: 1}} behavior="height">
+        <KeyboardAvoidingView keyboardVerticalOffset={60} style={{flex: 1}} behavior="height">
             <SafeAreaView style={styles.container}>
                 <TouchableOpacity 
-                    style={{position: "absolute", top: 64, right: 32, zIndex: 10}}
+                    style={{position: "absolute", top: 38, right: 32, zIndex: 10}}
                     onPress={this.props.closeModal}
                 >
                     <AntDesign name="close" size={24} color={colors.black} />
@@ -73,22 +77,55 @@ export default class TodoModal extends React.Component {
                 <View style={[styles.section, styles.header, {borderBottomColor: list.color}]}>
                     <View>
                         <Text style={styles.title}>{list.name}</Text>
-                        <Text style={styles.taskCount}>
-                            {completedCount} of {taskCount} tasks
-                        </Text>
+
                     </View>
                 </View>
                 
-                <View style={[styles.section, {flex: 3}]}>
-                    <FlatList
+                <View style={[styles.section, {flex: 10}]}>
+                    <SwipeListView
                         data={list.todos}
-                        renderItem={({ item, index }) => this.renderTodo(item, index)}
+                        renderItem={({ item, index }) => 
+                        <View style={styles.rowFront}>
+                            <NumericInput 
+                                value={this.state.value} 
+                                onChange={value => this.setState({value})} 
+                                onLimitReached={(isMax,msg) => console.log(isMax,msg)}
+                                totalWidth={90} 
+                                totalHeight={50} 
+                                iconSize={25}
+                                step={1}
+                                valueType='real'
+                                rounded 
+                                textColor='#B0228C' 
+                                iconStyle={{ color: 'white' }} 
+                                rightButtonBackgroundColor='#EA3788' 
+                                leftButtonBackgroundColor='#E56B70'
+                            />
+                            <Text style={[styles.todo]}>{item.title
+                                }
+                            </Text>
+                        </View>
+                        }
+                        //this.renderTodo(item, index)}
+                        renderHiddenItem={({ item, index }) => (
+                            <View style={styles.rowBack}>
+                                <TouchableOpacity
+                                style={[styles.backRightBtn, styles.backRightBtnRight]}
+                                onPress={() => this.deleteTodo(item)}
+                                >
+                                <Text style={styles.backTextWhite}>Delete</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                         keyExtractor={(_, index) => index.toString()}
+                        
+                        rightOpenValue={-75}
                         contentContainerStyle={{paddingHorizontal: 32, paddingVertical: 64}}
                         showsVerticalScrollIndicator={false}
                     />
 
                 </View>
+                
                 <View style={[styles.section, styles.footer]}>
                     <TextInput 
                         style={[styles.input, {borderColor: list.color}]}
@@ -113,17 +150,16 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'black',
     },
     section: {
         flex: 1,
-        alignSelf: 'stretch'
+        alignSelf: 'stretch',
     },
     header: {
         justifyContent: 'flex-end',
-        marginLeft: 64,
-        borderBottomWidth: 3
+        marginLeft: 44,
+        marginRight: 150,
+        
     },
     title: {
         fontSize: 30,
@@ -139,21 +175,22 @@ const styles = StyleSheet.create({
     footer: {
         paddingHorizontal: 32,
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
     },
     input: {
         flex: 1,
+        backgroundColor: 'white',
         height: 48,
         borderWidth: StyleSheet.hairlineWidth,
         borderRadius: 6,
         marginRight: 8,
-        paddingHorizontal: 8
+        paddingHorizontal: 8,
     },
     addTodo: {
         borderRadius: 4,
         padding: 16,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     todoContainer: {
         paddingVertical: 16,
@@ -163,7 +200,7 @@ const styles = StyleSheet.create({
     todo: {
         color: colors.black,
         fontWeight: "700",
-        fontSize: 16,
+        fontSize: 22,
         marginLeft: 8
     },
     deleteContainer: {
@@ -171,5 +208,45 @@ const styles = StyleSheet.create({
     },
     deleteButton: {
         alignSelf: 'flex-end'
-    }
+    },
+    backTextWhite: {
+        color: '#FFF',
+    },
+    rowFront: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fffffe',
+        borderBottomColor: 'black',
+        borderBottomWidth: 1,
+        borderTopColor: 'black',
+        borderTopWidth: 1,
+        //justifyContent: 'center',
+        height: 70,
+        marginBottom: 5,
+    },
+    rowBack: {
+        alignItems: 'center',
+        backgroundColor: '#DDD',
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingLeft: 15,
+        marginBottom: 5,
+    },
+    backRightBtn: {
+        alignItems: 'center',
+        bottom: 0,
+        justifyContent: 'center',
+        position: 'absolute',
+        top: 0,
+        width: 75,
+    },
+    backRightBtnLeft: {
+        backgroundColor: 'blue',
+        right: 75,
+    },
+    backRightBtnRight: {
+        backgroundColor: 'red',
+        right: 0,
+    },
 })

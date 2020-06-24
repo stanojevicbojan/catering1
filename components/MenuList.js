@@ -2,11 +2,12 @@
 import React from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Modal } from 'react-native'
 import colors from '../Colors'
-import TodoModal from './TodoModal'
+import MenuModal from './MenuModal'
+import { FlatList } from 'react-native-gesture-handler'
 
-export default class TodoList extends React.Component {
+export default class MenuList extends React.Component {
     state = {
-        showListVisible: false
+        showListVisible: false,
     }
 
     toggleListModal() {
@@ -15,9 +16,14 @@ export default class TodoList extends React.Component {
 
     render() {
         const list = this.props.list
-
-        const completedCount = list.todos.filter(todo => todo.completed).length
-        const remainingCount = list.todos.length - completedCount
+    
+        const completedCount = list.todos.map((todo,index) => 
+            {
+                return (
+                        <Text key={index}>{'\u25cf'} {todo.title}{"\n"}</Text>
+                )
+            }
+            )
 
         return (
             <View>
@@ -26,7 +32,7 @@ export default class TodoList extends React.Component {
                     visible={this.state.showListVisible} 
                     onRequestClose={() => this.toggleListModal()}
                 >
-                    <TodoModal 
+                    <MenuModal 
                         list={list} 
                         closeModal={() => this.toggleListModal()}
                         updateList={this.props.updateList} 
@@ -40,17 +46,12 @@ export default class TodoList extends React.Component {
                 
 
                     <Text style={styles.listTitle} numberOfLines={1}>
-                        Date range:{list.name}
+                        {list.name}
                     </Text>
-        
                     <View>
                         <View style={{alignItems: 'center'}}>
-                            <Text style={styles.count}>Completed: {completedCount}</Text>
+                            <Text style={styles.count}>{completedCount}</Text>
                            {/* <Text style={styles.subtitle}>Completed</Text> */}
-                        </View>
-                        <View style={{alignItems: 'center'}}>
-                            <Text style={styles.count}>Remaining: {remainingCount}</Text>
-                            {/* <Text style={styles.subtitle}>Remaining</Text> */}
                         </View>
                     </View>
                 </TouchableOpacity>
@@ -64,10 +65,11 @@ const styles = StyleSheet.create({
     listContainer: {
         paddingVertical: 32,
         paddingHorizontal: 16,
-        borderRadius: 16,
+        
         marginHorizontal: 12,
         alignItems: "center",
         width: 250,
+        minHeight: 300,
     },
     listTitle: {
         fontSize: 14,
@@ -76,8 +78,8 @@ const styles = StyleSheet.create({
         marginBottom: 18,
     },
     count: {
-        fontSize: 28,
-        fontWeight: "700",
+        fontSize: 20,
+        fontWeight: "400",
         color: colors.white
     },
     subtitle: {

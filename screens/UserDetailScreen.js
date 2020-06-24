@@ -21,7 +21,7 @@ class UserDetailScreen extends Component {
 
   componentDidMount() {
 
-    const dbRef = firebase.firestore().collection('users').doc(this.props.navigation.state.params.userkey)
+    const dbRef = firebase.firestore().collection('contacts').doc(this.props.navigation.state.params.userkey)
     dbRef.get().then((res) => {
       if (res.exists) {
         const user = res.data();
@@ -48,7 +48,7 @@ class UserDetailScreen extends Component {
     this.setState({
       isLoading: true,
     });
-    const updateDBRef = firebase.firestore().collection('users').doc(this.state.key);
+    const updateDBRef = firebase.firestore().collection('contacts').doc(this.state.key);
     updateDBRef.set({
       name: this.state.name,
       email: this.state.email,
@@ -74,7 +74,7 @@ class UserDetailScreen extends Component {
 
 
   deleteUser() {
-    const dbRef = firebase.firestore().collection('users').doc(this.props.route.params.userkey)
+    const dbRef = firebase.firestore().collection('contacts').doc(this.props.navigation.state.params.userkey)
       dbRef.delete().then((res) => {
           console.log('Item removed from database')
           this.props.navigation.navigate('Contacts');
@@ -126,6 +126,7 @@ class UserDetailScreen extends Component {
               placeholder={'Mobile'}
               value={this.state.mobile}
               onChangeText={(val) => this.inputValueUpdate(val, 'mobile')}
+              keyboardType={'numeric'}
           />
         </View>
         <View style={styles.emailButtonContainer}>

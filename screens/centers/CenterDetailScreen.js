@@ -3,6 +3,7 @@ import { Alert, Button, StyleSheet, TextInput, ScrollView, ActivityIndicator, Vi
 import firebase from '../../database/firebaseDb';
 import { openInbox } from 'react-native-email-link'
 import { Linking } from 'expo';
+import { Row } from 'native-base';
 
 
 class CenterDetailScreen extends Component {
@@ -11,8 +12,8 @@ class CenterDetailScreen extends Component {
     super();
     this.state = {
       name: '',
-      email: '',
-      mobile: '',
+      am: '',
+      lunch: '',
       pm: '',
       maps: '',
       phone: '',
@@ -31,8 +32,8 @@ class CenterDetailScreen extends Component {
         this.setState({
           key: res.id,
           name: user.name,
-          email: user.email,
-          mobile: user.mobile,
+          am: user.am,
+          lunch: user.lunch,
           pm: user.pm,
           maps: user.maps,
           phone: user.phone,
@@ -51,28 +52,31 @@ class CenterDetailScreen extends Component {
   }
 
   updateUser() {
+    if(this.state.name === ''){
+      alert('Fill at least your name!')
+     } else {
     this.setState({
       isLoading: true,
     });
     const updateDBRef = firebase.firestore().collection('centers').doc(this.state.key);
     updateDBRef.set({
       name: this.state.name,
-      email: this.state.email,
-      mobile: this.state.mobile,
-      pm: this.state.pm,
+      am: parseInt(this.state.am.replace(/[^0-9]/g, '')),
+      lunch: this.state.lunch,
+      pm: parseInt(this.state.pm),
       maps: this.state.maps,
       phone: this.state.phone,
     }).then((docRef) => {
-      this.setState({
+     /* this.setState({
         key: '',
         name: '',
-        email: '',
-        mobile: '',
+        am: '',
+        lunch: '',
         pm: '',
         maps: '',
         phone: '',
         isLoading: false,
-      });
+      });*/
       this.props.navigation.navigate('Centers');
     })
     .catch((error) => {
@@ -82,7 +86,7 @@ class CenterDetailScreen extends Component {
       });
     });
   }
-
+  }
 
 
   deleteUser() {
@@ -129,6 +133,7 @@ class CenterDetailScreen extends Component {
               placeholder={'Phone'}
               value={this.state.phone}
               onChangeText={(val) => this.inputValueUpdate(val, 'phone')}
+              keyboardType={'numeric'}
           />
         </View>
         <View style={styles.inputGroup}>
@@ -136,15 +141,17 @@ class CenterDetailScreen extends Component {
               //multiline={true}
               //numberOfLines={4}
               placeholder={'AM'}
-              value={this.state.email}
-              onChangeText={(val) => this.inputValueUpdate(val, 'email')}
+              value={this.state.am}
+              onChangeText={(val) => this.inputValueUpdate(val, 'am')}
+              keyboardType={'numeric'}
           />
         </View>
         <View style={styles.inputGroup}>
           <TextInput
               placeholder={'Lunch'}
-              value={this.state.mobile}
-              onChangeText={(val) => this.inputValueUpdate(val, 'mobile')}
+              value={this.state.lunch}
+              onChangeText={(val) => this.inputValueUpdate(val, 'lunch')}
+              keyboardType={'numeric'}
           />
         </View>
         <View style={styles.inputGroup}>
@@ -152,6 +159,7 @@ class CenterDetailScreen extends Component {
               placeholder={'PM'}
               value={this.state.pm}
               onChangeText={(val) => this.inputValueUpdate(val, 'pm')}
+              keyboardType={'numeric'}
           />
         </View>
         <View style={styles.inputGroup}>
@@ -161,29 +169,31 @@ class CenterDetailScreen extends Component {
               onChangeText={(val) => this.inputValueUpdate(val, 'maps')}
           />
         </View>
+        
         <View style={styles.emailButtonContainer}>
           <Button
-            title='Email'
-            onPress={() =>   Linking.openURL(`mailto:${this.state.email}`)}
+            title='Call'
+            onPress={() =>   Linking.openURL(`tel:${this.state.phone}`)}
             color="#3340db"
             />
         </View>
 
         <View style={styles.callButtonContainer}>
           <Button
-            title='Call'
-            onPress={() =>   Linking.openURL(`tel:${this.state.mobile}`)}
+            title='Open map'
+            onPress={() =>   Linking.openURL(this.state.maps)}
             color="#5fcbe2"
           />
         </View>
-        <View style={styles.button}>
+        
+        <View style={styles.updateButton}>
           <Button
             title='Update'
             onPress={() => this.updateUser()}
             color="#19AC52"
           />
           </View>
-         <View>
+         <View style={styles.deleteButton}>
           <Button
             title='Delete'
             onPress={this.openTwoButtonAlert}
@@ -198,7 +208,7 @@ class CenterDetailScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 35
+    padding: 35,
   },
   inputGroup: {
     flex: 1,
@@ -224,6 +234,12 @@ const styles = StyleSheet.create({
   },
   callButtonContainer: {
     marginBottom: 5
+  },
+  updateButton: {
+    marginTop: 20,
+  },
+  deleteButton: {
+    marginTop: 7,
   }
 })
 

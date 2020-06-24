@@ -12,7 +12,7 @@ class ContactsScreen extends Component {
 
   constructor() {
     super();
-    this.firestoreRef = firebase.firestore().collection('users');
+    this.firestoreRef = firebase.firestore().collection('contacts');
     this.state = {
       isLoading: true,
       userArr: [],
@@ -21,7 +21,7 @@ class ContactsScreen extends Component {
     };
   }
 
- 
+
 
 
   componentDidMount() {
@@ -54,8 +54,6 @@ class ContactsScreen extends Component {
       emailsList: [...new Set(allEmails)],
    });
   }
-
-  
 
   render() {
     if(this.state.isLoading){
@@ -120,7 +118,7 @@ class ContactsScreen extends Component {
 const styles = StyleSheet.create({
   container: {
    flex: 1,
-   paddingBottom: 22
+   //paddingBottom: 22
   },
   preloader: {
     left: 0,

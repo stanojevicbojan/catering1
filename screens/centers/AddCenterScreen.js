@@ -10,10 +10,10 @@ class AddCenterScreen extends Component {
     this.dbRef = firebase.firestore().collection('centers');
     this.state = {
       name: '',
-      email: '',
-      mobile: '',
-      /*new*/pm: '',
-      /*new*/maps: '',
+      am: '',
+      lunch: '',
+      pm: '',
+      maps: '',
       phone: '',
       isLoading: false
     };
@@ -34,16 +34,16 @@ class AddCenterScreen extends Component {
       });      
       this.dbRef.add({
         name: this.state.name,
-        email: this.state.email,
-        mobile: this.state.mobile,
-        pm: this.state.pm,
+        am: parseInt(this.state.am),
+        lunch: parseInt(this.state.lunch),
+        pm: parseInt(this.state.pm),
         maps: this.state.maps,
         phone: this.state.phone,
       }).then((res) => {
         this.setState({
           name: '',
-          email: '',
-          mobile: '',
+          am: '',
+          lunch: '',
           pm: '',
           maps: '',
           phone:'',
@@ -82,6 +82,7 @@ class AddCenterScreen extends Component {
               placeholder={'Phone'}
               value={this.state.phone}
               onChangeText={(val) => this.inputValueUpdate(val, 'phone')}
+              keyboardType={'numeric'}
           />
         </View>
         <View style={styles.inputGroup}>
@@ -89,15 +90,17 @@ class AddCenterScreen extends Component {
               //multiline={true}
               //numberOfLines={4}
               placeholder={'AM'}
-              value={this.state.email}
-              onChangeText={(val) => this.inputValueUpdate(val, 'email')}
+              value={this.state.am}
+              onChangeText={(val) => this.inputValueUpdate(val, 'am')}
+              keyboardType={'numeric'}
           />
         </View>
         <View style={styles.inputGroup}>
           <TextInput
               placeholder={'Lunch'}
-              value={this.state.mobile}
-              onChangeText={(val) => this.inputValueUpdate(val, 'mobile')}
+              value={this.state.lunch}
+              onChangeText={(val) => this.inputValueUpdate(val, 'lunch')}
+              keyboardType={'numeric'}
           />
         </View>
         <View style={styles.inputGroup}>
@@ -105,6 +108,7 @@ class AddCenterScreen extends Component {
               placeholder={'PM'}
               value={this.state.pm}
               onChangeText={(val) => this.inputValueUpdate(val, 'pm')}
+              keyboardType={'numeric'}
           />
         </View>
         <View style={styles.inputGroup}>

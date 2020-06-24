@@ -80,7 +80,12 @@ const ContactsNavigation = createStackNavigator(
 
 const CentersNavigation = createStackNavigator(
   {
-    Centers: CentersScreen,
+    Centers: {
+      screen: CentersScreen,
+      navigationOptions: {
+        headerShown: false,
+      }
+    },
     AddCenterScreen: AddCenterScreen,
     CenterDetailScreen: CenterDetailScreen,
     },

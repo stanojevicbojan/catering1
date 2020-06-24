@@ -7,7 +7,7 @@ import firebase from '../database/firebaseDb';
 class AddUserScreen extends Component {
   constructor() {
     super();
-    this.dbRef = firebase.firestore().collection('users');
+    this.dbRef = firebase.firestore().collection('contacts');
     this.state = {
       name: '',
       email: '',
@@ -82,6 +82,7 @@ class AddUserScreen extends Component {
               placeholder={'Mobile'}
               value={this.state.mobile}
               onChangeText={(val) => this.inputValueUpdate(val, 'mobile')}
+              keyboardType={'numeric'}
           />
         </View>
         <View style={styles.button}>

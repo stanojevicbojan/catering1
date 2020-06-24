@@ -4,8 +4,9 @@ import React, { Component } from 'react';
 import { StyleSheet, ScrollView, ActivityIndicator, Text } from 'react-native';
 import { ListItem } from 'react-native-elements'
 import firebase from '../../database/firebaseDb';
-import { Container, Header, View, Button, Icon, Fab } from 'native-base';
+import { Container, Header, View, Button, Icon, Fab, Badge } from 'native-base';
 import { Linking } from 'expo';
+import colors from '../../Colors'
 
 class CentersScreen extends Component {
 
@@ -16,12 +17,11 @@ class CentersScreen extends Component {
       isLoading: true,
       userArr: [],
       active: false,
-      emailsList: []
+      amNumbersList: [],
+      lunchNumbersList: [],
+      pmNumbersList: [],
     };
   }
-
- 
-
 
   componentDidMount() {
     this.unsubscribe = this.firestoreRef.onSnapshot(this.getCollection);
@@ -32,25 +32,34 @@ class CentersScreen extends Component {
   }
 
   getCollection = (querySnapshot) => {
-    const allEmails = []
+    const allAmNumbers = [];
+    const allLunchNumbers = [];
+    const allPmNumbers = [];
     const userArr = [];
     querySnapshot.forEach((res) => {
-      const { name, email, mobile } = res.data();
+      const { name, am, lunch, pm, maps, phone } = res.data();
       userArr.push({
         key: res.id,
         res,
         name,
-        email,
-        mobile,
+        am,
+        lunch,
+        pm,
+        maps,
+        phone,
       });
       for (let u = 0; u < userArr.length; u++) {
-        allEmails.push(userArr[u].email)
+        allAmNumbers.push(userArr[u].am)
+        allLunchNumbers.push(userArr[u].lunch)
+        allPmNumbers.push(userArr[u].pm)
       }
     });
     this.setState({
       userArr,
       isLoading: false,
-      emailsList: [...new Set(allEmails)],
+      amNumbersList: [...new Set(allAmNumbers)],
+      lunchNumbersList: [...new Set(allLunchNumbers)],
+      pmNumbersList: [...new Set(allPmNumbers)],
    });
   }
 
@@ -66,8 +75,14 @@ class CentersScreen extends Component {
     }    
     return (
     <View style={styles.container}>
-      <ScrollView>
-       
+      <View style={{flexDirection: "row"}}>
+                    <View style={styles.divider} />
+                    <Text style={styles.title}>
+                        Centers <Text style={{fontWeight: "300", color: colors.blue}}>List</Text>
+                    </Text>
+                    <View style={styles.divider} />
+                </View>
+      <ScrollView style={{marginBottom: 20,}}>
           {
             this.state.userArr.map((item, i) => {
               return (
@@ -76,7 +91,14 @@ class CentersScreen extends Component {
                   chevron
                   bottomDivider
                   title={item.name}
-                  subtitle={item.mobile}
+                  subtitle={
+                    <View>
+                      <Text>Phone: {item.phone}</Text>
+                      <Text>AM: {item.am}</Text>
+                      <Text>Lunch: {item.lunch}</Text>
+                      <Text>PM: {item.pm}</Text>
+                    </View>
+                  }
                   onPress={() => {
                     this.props.navigation.navigate('CenterDetailScreen', {
                       userkey: item.key
@@ -86,7 +108,8 @@ class CentersScreen extends Component {
             })
           }
       </ScrollView>
-      <View style={{ flex: 1 }}>
+      
+      <View style={styles.fabContainer}>
           <Fab
             active={this.state.active}
             direction="up"
@@ -99,6 +122,21 @@ class CentersScreen extends Component {
             <Icon name="ios-add" />
           </Fab>
         </View>
+        <View style={styles.totalNumbers}>
+        <Badge primary>
+        <Text style={styles.textStyle}>Total AM: {this.state.amNumbersList.reduce(function(a,b) 
+        { return a + b},0)}</Text>
+        </Badge>
+
+        <Badge>
+        <Text style={styles.textStyle}>Total Lunch: {this.state.lunchNumbersList.reduce(function(a,b) { return a + b},0)}</Text>
+        </Badge>
+
+        <Badge info>
+        <Text style={styles.textStyle}>Total PM: {this.state.pmNumbersList.reduce(function(a,b) { return a + b},0)}</Text>
+        </Badge>
+
+      </View>
       </View>
     );
   }
@@ -107,7 +145,7 @@ class CentersScreen extends Component {
 const styles = StyleSheet.create({
   container: {
    flex: 1,
-   paddingBottom: 22
+   marginTop: 20,
   },
   preloader: {
     left: 0,
@@ -117,7 +155,39 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center'
-  }
+  },
+  totalNumbers: {
+    flex: 1,
+    marginLeft: 10,
+    marginRight: 10,
+    marginBottom: 7,
+    paddingLeft: 10,
+    paddingRight: 10,
+    justifyContent: "space-between",
+    flexDirection: 'row',
+    position: 'absolute', left: 0, right: 0, bottom: 0,
+    alignItems: "center",
+  },
+  textStyle: {
+    paddingTop: 3,
+    color: 'white',
+  },
+  fabContainer: {
+    flex: 1,
+    marginBottom: 20,
+  },
+  divider: {
+      backgroundColor: colors.lightBlue,
+      height: 1,
+      flex: 1,
+      alignSelf: 'center'
+  },
+  title: {
+      fontSize: 38,
+      fontWeight: "700",
+      color: colors.black,
+      paddingHorizontal: 64,
+  },
 })
 
 export default CentersScreen

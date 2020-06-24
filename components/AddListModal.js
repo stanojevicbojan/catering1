@@ -1,3 +1,4 @@
+//Adds new Shopping list
 import React from 'react'
 import { View, Text, StyleSheet, KeyboardAvoidingView, TouchableOpacity, TextInput, Keyboard } from 'react-native'
 import { AntDesign } from '@expo/vector-icons'
@@ -43,7 +44,7 @@ render () {
             </TouchableOpacity>
 
             <View style={{alignSelf: "stretch", marginHorizontal: 32 }}>
-                <Text style={styles.title}>Create Todo list</Text>
+                <Text style={styles.title}>Create new shopping list</Text>
 
                 <TextInput
                     style={styles.input}
@@ -69,7 +70,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        borderWidth: 2,
     },
     title: {
         fontSize: 28,
