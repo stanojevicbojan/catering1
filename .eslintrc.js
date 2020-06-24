@@ -13,19 +13,24 @@ module.exports = {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
+    "parser": "babel-eslint",
     "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
         "ecmaFeatures": {
-            "jsx": true
+            "jsx": true,
+            "modules": true,
+            "experimentalObjectRestSpread": true
         },
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
     "plugins": [
         "react",
-    		"react-native"
+    	"react-native"
     ],
     "rules": {
-			"react-native/no-unused-styles": 2,
+		"react-native/no-unused-styles": 2,
 	    "react-native/split-platform-components": 2,
 	    "react-native/no-inline-styles": 2,
 	    "react-native/no-color-literals": 2,

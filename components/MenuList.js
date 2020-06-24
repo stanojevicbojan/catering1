@@ -1,9 +1,10 @@
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Modal } from 'react-native'
 import colors from '../Colors'
 import MenuModal from './MenuModal'
-import { FlatList } from 'react-native-gesture-handler'
 
 export default class MenuList extends React.Component {
     state = {
@@ -80,11 +81,6 @@ const styles = StyleSheet.create({
     count: {
         fontSize: 20,
         fontWeight: "400",
-        color: colors.white
-    },
-    subtitle: {
-        fontSize: 12,
-        fontWeight: "700",
         color: colors.white
     }
 })
