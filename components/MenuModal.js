@@ -1,15 +1,31 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity,  KeyboardAvoidingView, TextInput } from 'react-native';
-import { AntDesign, Ionicons } from '@expo/vector-icons'
+import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import colors from '../Colors'
 import { SwipeListView } from 'react-native-swipe-list-view';
+import firebase from '../database/firebaseDb';
+
 
 export default class MenuModal extends React.Component {
     state = {
         newTodo: "",
     }
 
+    addToShoppingList = (index) => {
+        
+        var newToDo = {
+            todos: [{"completed": false, "title": "zajebavanje"}]
+        }
 
+        let list = this.props.list
+        console.log(list.todos[1].title)
+        firebase.firestore().collection('users').doc('1mXHCyEEYnhyIqiqyeqi').collection('lists').doc('PHctNyYf5MHyofyNkW2j').update({todos: firebase.firestore.FieldValue.arrayUnion({"completed": false, "title": list.todos[index].title})}).then(alert("Item added to shopping list!"))
+        /*
+        let shoppingCart = firebase.firestore().collection('users').doc('1mXHCyEEYnhyIqiqyeqi').collection('lists').doc('PHctNyYf5MHyofyNkW2j').onSnapshot(function(doc) {
+            console.log("Current data: ", doc.data());
+        })
+        return shoppingCart*/
+    }
 
     
 
@@ -113,6 +129,9 @@ export default class MenuModal extends React.Component {
                             <Text style={[styles.todo]}>{item.title
                                 }
                             </Text>
+                            <TouchableOpacity style={styles.addToCart} onPress={() => this.addToShoppingList(index)}>
+                                <MaterialCommunityIcons name={'cart-arrow-up'} size={48} color={colors.blue} />
+                            </TouchableOpacity>
                         </View>
                         }
                         //this.renderTodo(item, index)}
@@ -120,7 +139,7 @@ export default class MenuModal extends React.Component {
                             <View style={styles.rowBack}>
                                 <TouchableOpacity
                                 style={[styles.backRightBtn, styles.backRightBtnRight]}
-                                onPress={() => this.deleteTodo(item)}
+                                onPress={() => this.deleteTodo(index)}
                                 >
                                 <Text style={styles.backTextWhite}>Delete</Text>
                                 </TouchableOpacity>
@@ -207,10 +226,14 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     todo: {
+        flex: 1,
         color: colors.black,
         fontWeight: "700",
         fontSize: 22,
-        marginLeft: 8
+        marginLeft: 8,
+        maxWidth: 250,
+        paddingTop: 10,
+        paddingBottom: 10,
     },
     deleteContainer: {
         flex: 1,
@@ -230,7 +253,7 @@ const styles = StyleSheet.create({
         borderTopColor: 'black',
         borderTopWidth: 1,
         //justifyContent: 'center',
-        height: 70,
+        height: 80,
         marginBottom: 5,
     },
     rowBack: {
@@ -240,7 +263,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingLeft: 15,
-        marginBottom: 5,
+        marginBottom: 6,
+        
     },
     backRightBtn: {
         alignItems: 'center',
@@ -262,5 +286,8 @@ const styles = StyleSheet.create({
         fontSize: 25,
         marginRight: 10,
         marginLeft: 10,
+    },
+    addToCart: {
+        alignItems: 'flex-end'
     }
 })
