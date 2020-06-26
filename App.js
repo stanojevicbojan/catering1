@@ -43,7 +43,7 @@ if (!global.btoa) { global.btoa = encode; }
 
 if (!global.atob) { global.atob = decode; }
 
-import * as firebase from 'firebase'
+import firebase from 'firebase'
 
 
 var firebaseConfig = {
@@ -69,7 +69,12 @@ const AppStack = createStackNavigator({
 
 const ContactsNavigation = createStackNavigator(
   {
-    Contacts: ContactsScreen,
+    Contacts: {
+      screen: ContactsScreen,
+      navigationOptions: {
+        headerShown: false,
+      }
+    },
     AddUserScreen: AddUserScreen,
     UserDetailScreen: UserDetailScreen,
     },

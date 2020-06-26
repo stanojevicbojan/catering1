@@ -4,9 +4,10 @@ import React, { Component } from 'react';
 import { StyleSheet, ScrollView, ActivityIndicator, Text } from 'react-native';
 import { ListItem } from 'react-native-elements'
 import firebase from '../database/firebaseDb';
-import { Container, Header, View, Button, Icon, Fab } from 'native-base';
+import { View, Button, Icon, Fab } from 'native-base';
 import { Linking } from 'expo';
-import { AntDesign } from '@expo/vector-icons'
+import colors from '../Colors'
+
 
 class ContactsScreen extends Component {
 
@@ -65,6 +66,13 @@ class ContactsScreen extends Component {
     }    
     return (
     <View style={styles.container}>
+            <View style={{flexDirection: "row"}}>
+                    <View style={styles.divider} />
+                    <Text style={styles.title}>
+                        Contacts <Text style={{fontWeight: "300", color: colors.pink}}>List</Text>
+                    </Text>
+                    <View style={styles.divider} />
+                </View>
       <ScrollView>
        
           {
@@ -128,7 +136,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center'
-  }
+  },
+  divider: {
+      backgroundColor: colors.lightBlue,
+      height: 1,
+      flex: 1,
+      alignSelf: 'center'
+  },
+  title: {
+      fontSize: 38,
+      fontWeight: "700",
+      color: colors.black,
+      paddingHorizontal: 64,
+  },
 })
 
 export default ContactsScreen

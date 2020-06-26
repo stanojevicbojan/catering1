@@ -13,13 +13,10 @@ module.exports = {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
-    "parser": "babel-eslint",
     "parserOptions": {
-        "ecmaVersion": 6,
         "sourceType": "module",
         "ecmaFeatures": {
             "jsx": true,
-            "modules": true,
             "experimentalObjectRestSpread": true
         },
         "ecmaVersion": 2018,

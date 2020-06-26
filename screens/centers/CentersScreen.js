@@ -4,8 +4,7 @@ import React, { Component } from 'react';
 import { StyleSheet, ScrollView, ActivityIndicator, Text } from 'react-native';
 import { ListItem } from 'react-native-elements'
 import firebase from '../../database/firebaseDb';
-import { Container, Header, View, Button, Icon, Fab, Badge } from 'native-base';
-import { Linking } from 'expo';
+import { View, Icon, Fab, Badge } from 'native-base';
 import colors from '../../Colors'
 
 class CentersScreen extends Component {
@@ -75,13 +74,13 @@ class CentersScreen extends Component {
     }    
     return (
     <View style={styles.container}>
-      <View style={{flexDirection: "row"}}>
-                    <View style={styles.divider} />
-                    <Text style={styles.title}>
-                        Centers <Text style={{fontWeight: "300", color: colors.blue}}>List</Text>
-                    </Text>
-                    <View style={styles.divider} />
-                </View>
+        <View style={{flexDirection: "row"}}>
+            <View style={styles.divider} />
+              <Text style={styles.title}>
+              Centers <Text style={{fontWeight: "300", color: colors.grey}}>List</Text>
+              </Text>
+            <View style={styles.divider} />
+          </View>
       <ScrollView style={{marginBottom: 20,}}>
           {
             this.state.userArr.map((item, i) => {

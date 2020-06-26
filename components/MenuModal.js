@@ -1,15 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, KeyboardAvoidingView, TextInput, Keyboard, Animated } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity,  KeyboardAvoidingView, TextInput } from 'react-native';
 import { AntDesign, Ionicons } from '@expo/vector-icons'
 import colors from '../Colors'
-import NumericInput from 'react-native-numeric-input'
 import { SwipeListView } from 'react-native-swipe-list-view';
 
 export default class MenuModal extends React.Component {
     state = {
         newTodo: "",
-        value: 0,
     }
+
+
+
+    
 
     toggleTodoCompleted = index => {
         let list = this.props.list
@@ -17,9 +19,25 @@ export default class MenuModal extends React.Component {
         this.props.updateList(list)
     }
 
+    increaseAmount = index => {
+        let list = this.props.list
+        list.todos[index].counter = list.todos[index].counter + 1
+        this.props.updateList(list)
+    }
+
+    decreaseAmount = index => {
+        let list = this.props.list
+        if (list.todos[index].counter > 0 ) {
+        list.todos[index].counter = list.todos[index].counter - 1
+        } else if (list.todos[index].counter == 0) {
+            list.todos[index].counter == 0
+        }
+        this.props.updateList(list)  
+    }
+
     addTodo = () => {
         let list = this.props.list
-        list.todos.push({title: this.state.newTodo, completed: false})
+        list.todos.push({title: this.state.newTodo, completed: false, counter:1 })
 
         this.props.updateList(list)
         this.setState({newTodo: "" })
@@ -58,12 +76,10 @@ export default class MenuModal extends React.Component {
     }
 
 
+
+
   render() {
       const list = this.props.list
-      
-      const taskCount = list.todos.length
-      const completedCount = list.todos.filter(todo => todo.completed).length
-
     return (
         <KeyboardAvoidingView keyboardVerticalOffset={60} style={{flex: 1}} behavior="height">
             <SafeAreaView style={styles.container}>
@@ -77,7 +93,6 @@ export default class MenuModal extends React.Component {
                 <View style={[styles.section, styles.header, {borderBottomColor: list.color}]}>
                     <View>
                         <Text style={styles.title}>{list.name}</Text>
-
                     </View>
                 </View>
                 
@@ -86,21 +101,15 @@ export default class MenuModal extends React.Component {
                         data={list.todos}
                         renderItem={({ item, index }) => 
                         <View style={styles.rowFront}>
-                            <NumericInput 
-                                value={this.state.value} 
-                                onChange={value => this.setState({value})} 
-                                onLimitReached={(isMax,msg) => console.log(isMax,msg)}
-                                totalWidth={90} 
-                                totalHeight={50} 
-                                iconSize={25}
-                                step={1}
-                                valueType='real'
-                                rounded 
-                                textColor='#B0228C' 
-                                iconStyle={{ color: 'white' }} 
-                                rightButtonBackgroundColor='#EA3788' 
-                                leftButtonBackgroundColor='#E56B70'
-                            />
+                            
+                            <TouchableOpacity  onPress={() => this.decreaseAmount(index)}>
+                            <Ionicons name={'ios-remove-circle'} size={38} color={colors.gray} />
+                            </TouchableOpacity>
+                            <Text style={styles.counterText}>{item.counter}</Text>
+                            <TouchableOpacity  onPress={() => this.increaseAmount(index)}>
+                            <Ionicons name={'ios-add-circle'} size={38} color={colors.gray} />
+                            </TouchableOpacity>
+                            
                             <Text style={[styles.todo]}>{item.title
                                 }
                             </Text>
@@ -249,4 +258,9 @@ const styles = StyleSheet.create({
         backgroundColor: 'red',
         right: 0,
     },
+    counterText: {
+        fontSize: 25,
+        marginRight: 10,
+        marginLeft: 10,
+    }
 })
