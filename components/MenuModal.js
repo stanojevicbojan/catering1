@@ -10,24 +10,19 @@ export default class MenuModal extends React.Component {
     state = {
         newTodo: "",
     }
-
+//adds one item in the array to shopping list 
     addToShoppingList = (index) => {
-        
-        var newToDo = {
-            todos: [{"completed": false, "title": "zajebavanje"}]
-        }
-
         let list = this.props.list
-        console.log(list.todos[1].title)
         firebase.firestore().collection('users').doc('1mXHCyEEYnhyIqiqyeqi').collection('lists').doc('PHctNyYf5MHyofyNkW2j').update({todos: firebase.firestore.FieldValue.arrayUnion({"completed": false, "title": list.todos[index].title})}).then(alert("Item added to shopping list!"))
-        /*
-        let shoppingCart = firebase.firestore().collection('users').doc('1mXHCyEEYnhyIqiqyeqi').collection('lists').doc('PHctNyYf5MHyofyNkW2j').onSnapshot(function(doc) {
-            console.log("Current data: ", doc.data());
-        })
-        return shoppingCart*/
     }
-
-    
+//adds all items from the array to shopping list 
+    addAllToShoppingList = () => {
+        let list = this.props.list
+        for ( let i=0; i<list.todos.length; i++) {
+        firebase.firestore().collection('users').doc('1mXHCyEEYnhyIqiqyeqi').collection('lists').doc('PHctNyYf5MHyofyNkW2j').update({todos: firebase.firestore.FieldValue.arrayUnion({"completed": false, "title": list.todos[i].title})})
+        }
+        alert("Items added to shopping list!")
+    }
 
     toggleTodoCompleted = index => {
         let list = this.props.list
@@ -107,7 +102,13 @@ export default class MenuModal extends React.Component {
                 </TouchableOpacity>
 
                 <View style={[styles.section, styles.header, {borderBottomColor: list.color}]}>
-                    <View>
+                    <View style={styles.headerRow}>
+                        <View>
+                        <TouchableOpacity style={styles.addAllToCart} onPress={() => this.addAllToShoppingList()}>
+                            <Text style={{color: 'white', fontWeight: '700', textAlign: 'center'}}>Add all to Cart</Text>
+                            <MaterialCommunityIcons name={'cart-arrow-up'} size={18} color={'white'} />
+                        </TouchableOpacity>
+                        </View>
                         <Text style={styles.title}>{list.name}</Text>
                     </View>
                 </View>
@@ -119,18 +120,18 @@ export default class MenuModal extends React.Component {
                         <View style={styles.rowFront}>
                             
                             <TouchableOpacity  onPress={() => this.decreaseAmount(index)}>
-                            <Ionicons name={'ios-remove-circle'} size={38} color={colors.gray} />
+                            <Ionicons name={'ios-remove-circle'} size={38} color={"#E1E2E1"} />
                             </TouchableOpacity>
                             <Text style={styles.counterText}>{item.counter}</Text>
                             <TouchableOpacity  onPress={() => this.increaseAmount(index)}>
-                            <Ionicons name={'ios-add-circle'} size={38} color={colors.gray} />
+                            <Ionicons name={'ios-add-circle'} size={38} color={"#E1E2E1"} />
                             </TouchableOpacity>
                             
                             <Text style={[styles.todo]}>{item.title
                                 }
                             </Text>
                             <TouchableOpacity style={styles.addToCart} onPress={() => this.addToShoppingList(index)}>
-                                <MaterialCommunityIcons name={'cart-arrow-up'} size={48} color={colors.blue} />
+                                <MaterialCommunityIcons name={'cart-arrow-up'} size={30} color={'#ec407a'} />
                             </TouchableOpacity>
                         </View>
                         }
@@ -248,9 +249,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#fffffe',
-        borderBottomColor: 'black',
+        borderBottomColor: '#f1f1f1',
         borderBottomWidth: 1,
-        borderTopColor: 'black',
+        borderTopColor: '#f1f1f1',
         borderTopWidth: 1,
         //justifyContent: 'center',
         height: 80,
@@ -258,7 +259,7 @@ const styles = StyleSheet.create({
     },
     rowBack: {
         alignItems: 'center',
-        backgroundColor: '#DDD',
+        backgroundColor: '#f1f1f1',
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -288,6 +289,22 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
     addToCart: {
-        alignItems: 'flex-end'
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+    addAllToCart: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        backgroundColor: '#009faf',
+        padding: 10,
+        borderRadius: 20,
+        marginBottom: -8,
+        marginLeft: -40,
+        marginRight: 10,
+    },
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center'
     }
 })
