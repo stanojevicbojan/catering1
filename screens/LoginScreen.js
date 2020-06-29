@@ -1,6 +1,7 @@
 import React from 'react'
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, StatusBar, LayoutAnimation, KeyboardAvoidingView, TouchableWithoutFeedback, Platform, Keyboard } from 'react-native'
+import { Animated, View, Text, StyleSheet, TextInput, TouchableOpacity, Image, StatusBar, LayoutAnimation, KeyboardAvoidingView, TouchableWithoutFeedback, Platform, Keyboard } from 'react-native'
 import firebase from 'firebase'
+import LottieView from "lottie-react-native";
 
 export default class LoginScreen extends React.Component {
 
@@ -12,6 +13,12 @@ state = {
   email: "",
   password: "",
   errorMessage: null
+}
+
+componentDidMount() {
+  this.animation.play();
+  // Or set a specific startFrame and endFrame with:
+  // this.animation.play(30, 120);
 }
 
 handleLogin = () => {
@@ -28,25 +35,32 @@ handleLogin = () => {
     LayoutAnimation.easeInEaseOut()
 
     return (
-<KeyboardAvoidingView
-      behavior={Platform.Os == "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
+  <KeyboardAvoidingView
+        behavior={Platform.Os == "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.inner}>
 
           <StatusBar barStyle="light-content"></StatusBar>
 
-          <Image source={require('../assets/authHeader.png')} style={{marginTop: -100, marginLeft: -50}}
-          ></Image>
-
-
-
-          <Image source={require('../assets/loginLogo.png')} style={{marginTop: -70, marginLeft: 15, alignSelf: 'flex-start', width: 70, height: 70}}>
-          </Image>
+          <Animated.View style={styles.animationContainer}>
+            <LottieView
+              ref={animation => {
+                this.animation = animation;
+              }}
+              style={{
+                width: 98,
+                height: 98,
+              }}
+              source={require('../assets/food-carousel.json')}
+              // OR find more Lottie files @ https://lottiefiles.com/featured
+              // Just click the one you like, place that file in the 'assets' folder to the left, and replace the above 'require' statement
+            />
+          </Animated.View>
 
           <Text style={styles.greeting}>
-            {`Hello again!\nWelcome back.`}
+            {`Please login below.`}
           </Text>
           <View style={styles.errorMessage}>
             {this.state.errorMessage && <Text style={styles.error}>{this.state.errorMessage}</Text>}
@@ -104,18 +118,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inner: {
-    padding: 24,
+    padding: 14,
     flex: 1,
     justifyContent: "space-around"
   },
   greeting: {
-    marginTop: 32,
     fontSize: 18,
     fontWeight: '400',
-    textAlign: 'center'
+    textAlign: 'center',
   },
   errorMessage: {
-    height: 72,
+    height: 52,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: 3
@@ -149,5 +162,12 @@ const styles = StyleSheet.create({
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
+  animationContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    marginBottom: 15,
+    paddingTop: 5,
+  },
 })
