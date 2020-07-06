@@ -32,7 +32,11 @@ import ContactsScreen from './screens/ContactsScreen'
 import AddUserScreen from './screens/AddUserScreen';
 import UserDetailScreen from './screens/UserDetailScreen';
 
-import MenuScreen from './screens/MenuScreen'
+import CalendarsScreen from './screens/calendar/CalendarsScreen'
+import AddEventScreen from './screens/calendar/AddEventScreen'
+import EditEventScreen from './screens/calendar/EditEventScreen'
+
+
 import ShoppingScreen from './screens/ShoppingScreen'
 
 import { decode, encode } from 'base-64'
@@ -99,6 +103,22 @@ const CentersNavigation = createStackNavigator(
   },
 );
 
+const CalendarNavigation = createStackNavigator(
+  {
+    Calendars: {
+      screen: CalendarsScreen,
+      navigationOptions: {
+        headerShown: false,
+      }
+    },
+    AddEvent: AddEventScreen,
+    EditEvent: EditEventScreen,
+  },
+  {
+    initialRouteName: 'Calendars',
+  }
+)
+
 
 const AppTabNavigator = createBottomTabNavigator(
   {
@@ -126,8 +146,8 @@ const AppTabNavigator = createBottomTabNavigator(
         tabBarIcon: ({tintColor}) => <MaterialCommunityIcons name='office-building' size={35} color={tintColor} />
       }
     },
-    Menu: {
-      screen: MenuScreen,
+    Calendars: {
+      screen: CalendarNavigation,
       navigationOptions: {
         tabBarIcon: ({tintColor}) => <MaterialCommunityIcons name='food' size={35} color={tintColor} />
       },

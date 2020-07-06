@@ -8,7 +8,7 @@
     "eject": "expo eject"
   },
   "dependencies": {
-    "@react-native-community/datetimepicker": "2.2.2",
+    "@react-native-community/datetimepicker": "^2.2.2",
     "@react-native-community/masked-view": "0.1.6",
     "@react-navigation/bottom-tabs": "^5.2.5",
     "@react-navigation/native": "^5.1.4",
@@ -22,6 +22,7 @@
     "expo-font": "~8.1.0",
     "expo-localization": "~8.1.0",
     "firebase": "7.9.0",
+    "lottie-react-native": "~2.6.1",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.28",
     "native-base": "2.13.8",
@@ -46,8 +47,7 @@
     "react-native-web": "^0.11.7",
     "react-navigation": "^4.3.5",
     "react-navigation-stack": "^2.3.9",
-    "react-navigation-tabs": "^2.8.9",
-    "lottie-react-native": "~2.6.1"
+    "react-navigation-tabs": "^2.8.9"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

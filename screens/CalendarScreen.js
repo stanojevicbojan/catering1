@@ -1,27 +1,33 @@
-import React, { useState } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, Modal, Alert, TouchableHighlight } from 'react-native';
+import React, {Component} from 'react';
+import { Alert, Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Agenda } from 'react-native-calendars'
 import { Card } from 'react-native-paper';
 
 
-export default function HelloWorldApp() {
-  const [items, setItems] = useState({})
+export default class Calendar extends Component {
+  constructor(props) {
+    super(props);
 
-  const timeToString = (time) => {
+    this.state = {
+      items: {}
+    };
+  }
+
+  timeToString(time) {
     const date = new Date(time);
     return date.toISOString().split('T')[0];
   }
 
-  const loadItems = (day) => {
+  loadItems(day) {
     setTimeout(() => {
       for (let i = -15; i < 85; i++) {
         const time = day.timestamp + i * 24 * 60 * 60 * 1000;
-        const strTime = timeToString(time);
-        if (!items[strTime]) {
-          items[strTime] = [];
+        const strTime = this.timeToString(time);
+        if (!this.state.items[strTime]) {
+          this.state.items[strTime] = [];
           const numItems = Math.floor(Math.random() * 3 + 1);
           for (let j = 0; j < numItems; j++) {
-            items[strTime].push({
+            this.state.items[strTime].push({
               name: 'Item for ' + strTime + ' #' + j,
               height: Math.max(50, Math.floor(Math.random() * 150))
             });
@@ -29,15 +35,20 @@ export default function HelloWorldApp() {
         }
       }
       const newItems = {};
-      Object.keys(items).forEach(key => {newItems[key] = items[key];});
-      setItems(newItems)
+      Object.keys(this.state.items).forEach(key => {newItems[key] = this.state.items[key];});
+      this.setState({
+        items: newItems
+      });
     }, 1000);
   }
-
-  const renderItem = (item) => {
+  
+  renderItem(item) {
     
     return (
-      <TouchableOpacity style={{marginRight: 10, marginTop: 17,}} >
+      <TouchableOpacity
+        style={{marginRight: 10, marginTop: 17,}}
+        onPress={() => Alert.alert(item.name)}
+      >
         <Card>
           <Card.Content>
             <View
@@ -58,23 +69,24 @@ export default function HelloWorldApp() {
     )
   }
 
+  render() {
+    return (
+      
+      <View style={{flex: 1, marginTop:8,}}>
+        <Agenda
+          items={this.state.items}
+          loadItemsForMonth={this.loadItems.bind(this)}
+          selected={Date()}
+          renderItem={this.renderItem.bind(this)}
+          onDayPress={(day) => {console.log('selected day', day)}}
+          firstDay={1}
+          />
+      </View>
 
-  return (
-    
-    <View style={{flex: 1, marginTop:8,}}>
-      <Agenda
-        items={items}
-        loadItemsForMonth={loadItems}
-        selected={Date()}
-        renderItem={renderItem}
-        onDayPress={(day) => {console.log('selected day', day)}}
-        firstDay={1}
-        />
-    </View>
 
 
-
-  );
+    );
+  }
 }
 
 const styles = StyleSheet.create({

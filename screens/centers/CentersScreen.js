@@ -134,7 +134,7 @@ class CentersScreen extends Component {
         <Badge info>
         <Text style={styles.textStyle}>Total PM: {this.state.pmNumbersList.reduce(function(a,b) { return a + b},0)}</Text>
         </Badge>
-
+{console.log(this.state.userArr)}
       </View>
       </View>
     );
