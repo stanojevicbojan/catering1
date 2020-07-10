@@ -26,7 +26,7 @@ class CalendarsScreen extends Component {
 
   componentDidMount() {
     this.unsubscribe = this.firestoreRef.onSnapshot(this.getCollection);
-    firebase.firestore().collection('calendar').get().then(snap => {
+    this.listener = firebase.firestore().collection('calendar').onSnapshot(snap => {
       const myItems = {}
       snap.forEach(item => {
         myItems[item.id] = item.data()
@@ -37,6 +37,7 @@ class CalendarsScreen extends Component {
 
   componentWillUnmount(){
     this.unsubscribe();
+    this.listener();
   }
 
   getCollection = (querySnapshot) => {
@@ -148,12 +149,14 @@ class CalendarsScreen extends Component {
               );
             })
           }
-          {console.log(this.state.userArr)}
+         
       </ScrollView>
       */} 
+            {console.log(this.state.myItems.fxE7VTQ3p2Hpnu0tSpfT)}
+
       <View style={{flex: 1, marginTop:30,}}>
         <Agenda
-          items={this.state.myItems.fxE7VTQ3p2Hpnu0tSpfT}
+          items={this.state.myItems.HHSziHpW6yHi73o6PvMc}
           loadItemsForMonth={this.loadItems.bind(this)}
           selected={Date()}
           renderItem={this.renderItem.bind(this)}

@@ -13,13 +13,14 @@ class AddEventScreen extends Component {
   constructor() {
     super();
     this.dbRef = firebase.firestore().collection('calendar');
+    this.newRef = firebase.firestore().collection('calendar').doc('HHSziHpW6yHi73o6PvMc')
     this.state = {
       name: '',
       isLoading: false,
       date: new Date(),
       mode: 'datetime',
       show:false,
-      onlyDate:  '',
+      onlyDay: '',
     };
   }
 
@@ -36,15 +37,9 @@ class AddEventScreen extends Component {
       this.setState({
         isLoading: true,
       });      
-      this.dbRef.add({
-        name: this.state.name,
-        date: this.state.date
+      this.newRef.update({
+        [this.state.onlyDay]: firebase.firestore.FieldValue.arrayUnion({name: this.state.name, day: this.state.date}),
       }).then((res) => {
-        this.setState({
-          name: '',
-          date: '',
-          isLoading: false,
-        });
         this.props.navigation.navigate('Calendars')
       })
       .catch((err) => {
@@ -61,12 +56,15 @@ class AddEventScreen extends Component {
     this.setState({
         show: Platform.OS==='ios'?true:false,
         date,
+        onlyDay: date.toISOString().split('T')[0]
     })
     if (this.state.date == undefined) {
       this.setState({
-        date: new Date()
+        date: new Date(),
       })
     }
+
+
 }
 
 show = mode => {
@@ -118,6 +116,7 @@ timepicker = () => {
                 </TouchableOpacity>
               </View>
               <View>
+              {console.log(this.state.onlyDay)}
                   <Button onPress={this.timepicker} title="SHOW TIME PICKER"></Button>
               </View>
               {
@@ -127,6 +126,7 @@ timepicker = () => {
                       is24Hour={true}
                       display='default'
                       onChange={this.setDate}
+                      dateFormat="year-month-day"
                   >
                   </DateTimePicker>
               }
@@ -140,6 +140,7 @@ timepicker = () => {
             color="#19AC52"
           />
         </View>
+        
       </ScrollView>
     );
   }
