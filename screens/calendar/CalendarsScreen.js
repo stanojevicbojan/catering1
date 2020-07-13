@@ -15,6 +15,7 @@ class CalendarsScreen extends Component {
     super(props);
     this.firestoreRef = firebase.firestore().collection('calendar')
     this.calendarRef = firebase.firestore().collection('calendar')
+    this.eventRemove = firebase.firestore().collection('calendar').doc('HHSziHpW6yHi73o6PvMc')
     this.state = {
       isLoading: true,
       userArr: [],
@@ -97,14 +98,16 @@ class CalendarsScreen extends Component {
         },
         {
           text: "Delete",
-          onPress: () => console.log("Cancel Pressed"),
+          onPress: () => this.eventRemove.update({
+            "2020-07-13": firebase.firestore.FieldValue.arrayRemove({name: item.name, day: item.day}),
+          }),
           style: "cancel"
         },
         { text: "Close", onPress: () => console.log("OK Pressed") }
       ],
       { cancelable: false }
     );
-    
+
   renderItem(item) {
     
     return (
@@ -114,6 +117,8 @@ class CalendarsScreen extends Component {
       >
         <Card>
           <Card.Content>
+          {console.log(item)}
+
             <View
               style={{
                 flexDirection: 'row',
@@ -152,7 +157,6 @@ class CalendarsScreen extends Component {
           renderEmptyData={() => {return (<View><Text>No events for this day.</Text></View>);}}
           firstDay={1}
           />
-      
           <Fab
             active={this.state.active}
             direction="up"
