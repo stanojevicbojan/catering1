@@ -86,12 +86,31 @@ class CalendarsScreen extends Component {
     }, 1000);
   }
 
+  createThreeButtonAlert = (item) =>
+    Alert.alert(
+      `Event name: ${item.name}`,
+      `Date: ${item.day.toDate()}`,
+      [
+        {
+          text: "Add to calendar",
+          onPress: () => console.log("Ask me later pressed")
+        },
+        {
+          text: "Delete",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "Close", onPress: () => console.log("OK Pressed") }
+      ],
+      { cancelable: false }
+    );
+    
   renderItem(item) {
     
     return (
       <TouchableOpacity
         style={{marginRight: 10, marginTop: 17,}}
-        onPress={() => Alert.alert(item.name)}
+        onPress={() => this.createThreeButtonAlert(item)}
       >
         <Card>
           <Card.Content>
@@ -123,37 +142,6 @@ class CalendarsScreen extends Component {
     }    
     return (
     <View style={styles.container}>
-           {/* <View style={{flexDirection: "row", marginTop: 20,}}>
-                    <View style={styles.divider} />
-                    <Text style={styles.title}>
-                        Calendar <Text style={{fontWeight: "300", color: colors.pink}}>Events</Text>
-                    </Text>
-                    <View style={styles.divider} />
-                </View>
-      
-       
-          {
-            this.state.userArr.map((item, i) => {
-              return (
-                <ListItem
-                  key={i}
-                  chevron
-                  bottomDivider
-                  title={item.name}
-                  subtitle={item.date}
-                  onPress={() => {
-                    this.props.navigation.navigate('EditEvent', {
-                      userkey: item.key
-                    });
-                  }}/>
-              );
-            })
-          }
-         
-      </ScrollView>
-      */} 
-            {console.log(this.state.myItems.fxE7VTQ3p2Hpnu0tSpfT)}
-
       <View style={{flex: 1, marginTop:30,}}>
         <Agenda
           items={this.state.myItems.HHSziHpW6yHi73o6PvMc}
