@@ -6,7 +6,7 @@ import firebase from '../../database/firebaseDb';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { relativeTimeThreshold } from 'moment';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { AntDesign } from '@expo/vector-icons'
+import { AntDesign, Ionicons } from '@expo/vector-icons'
 
 
 class AddEventScreen extends Component {
@@ -16,10 +16,14 @@ class AddEventScreen extends Component {
     this.newRef = firebase.firestore().collection('calendar').doc('HHSziHpW6yHi73o6PvMc')
     this.state = {
       name: '',
+      location: '',
       isLoading: false,
       date: new Date(),
+      dateEnd: new Date(),
       mode: 'datetime',
+      modeEnd: 'datetime',
       show:false,
+      showEnd: false,
       onlyDay: '',
     };
   }
@@ -38,7 +42,7 @@ class AddEventScreen extends Component {
         isLoading: true,
       });      
       this.newRef.update({
-        [this.state.onlyDay]: firebase.firestore.FieldValue.arrayUnion({name: this.state.name, day: this.state.date}),
+        [this.state.onlyDay]: firebase.firestore.FieldValue.arrayUnion({name: this.state.name, location: this.state.location, day: this.state.date, dateEnd: this.state.dateEnd}),
       }).then((res) => {
         this.props.navigation.navigate('Calendars')
       })
@@ -51,7 +55,7 @@ class AddEventScreen extends Component {
     }
   }
 
-  setDate = (event, date) => {
+  setDate = (event, date, dateEnd) => {
     date = date || this.state.state
     this.setState({
         show: Platform.OS==='ios'?true:false,
@@ -63,9 +67,20 @@ class AddEventScreen extends Component {
         date: new Date(),
       })
     }
+  }
 
-
-}
+  setDateEnd = (event, dateEnd) => {
+    dateEnd = dateEnd || this.state.state
+    this.setState({
+        showEnd: Platform.OS==='ios'?true:false,
+        dateEnd,
+    })
+    if (this.state.dateEnd == undefined) {
+      this.setState({
+        dateEnd: new Date(),
+      })
+    }
+  }
 
 show = mode => {
   this.setState({
@@ -82,9 +97,24 @@ timepicker = () => {
   this.show('time')
 }
 
+showEnd = modeEnd => {
+  this.setState({
+      showEnd: true,
+      modeEnd,
+  })
+}
+
+datepickerEnd = () => {
+  this.showEnd('date')
+}
+
+timepickerEnd = () => {
+  this.showEnd('time')
+}
+
 
   render() {
-    const {show, date, mode} = this.state
+    const {show, showEnd, date, dateEnd, mode, modeEnd} = this.state
 
     if(this.state.isLoading){
       return(
@@ -103,22 +133,31 @@ timepicker = () => {
           />
         </View>
         <View style={styles.inputGroup}>
+          <TextInput
+              placeholder={'Location'}
+              value={this.state.location}
+              onChangeText={(val) => this.inputValueUpdate(val, 'location')}
+          />
+        </View>
+        <View >
         {/*Date Picker */}
           <View>
-              <View>
-                <Text>Select date: </Text>
-                <TouchableOpacity
+                <View
                   style={styles.datepicker}
-                  onPress={this.datepicker}
                 >
+                  <Text style={{color: '#808080'}}>Event starts: </Text>
                   <Text>{date !== undefined ? date.toString().substr(0,21) : date }</Text>
-                  <AntDesign name="calendar" size={24} color={'#3f51b5'} />
-                </TouchableOpacity>
-              </View>
-              <View>
-              {console.log(this.state.onlyDay)}
-                  <Button onPress={this.timepicker} title="SHOW TIME PICKER"></Button>
-              </View>
+                  <AntDesign style={{marginLeft:20}} name="calendar" size={34} color={'#000000'} onPress={this.datepicker}/>
+                  <Ionicons style={{marginLeft:20}} name="md-timer" size={34} color={'#000000'} onPress={this.timepicker}/>
+                </View>
+                <View
+                  style={styles.datepicker}
+                >
+                  <Text style={{color: '#808080'}}>Event ends: </Text>
+                  <Text>{dateEnd !== undefined ? dateEnd.toString().substr(0,21) : dateEnd }</Text>
+                  <AntDesign style={{marginLeft:20}} name="calendar" size={34} color={'#000000'} onPress={this.datepickerEnd}/>
+                  <Ionicons style={{marginLeft:20}} name="md-timer" size={34} color={'#000000'} onPress={this.timepickerEnd}/>
+                </View>
               {
                   show && <DateTimePicker
                       value={date}
@@ -130,14 +169,25 @@ timepicker = () => {
                   >
                   </DateTimePicker>
               }
+                            {
+                 showEnd  && <DateTimePicker
+                      value={dateEnd}
+                      mode={modeEnd}
+                      is24Hour={true}
+                      display='default'
+                      onChange={this.setDateEnd}
+                      dateFormat="year-month-day"
+                  >
+                  </DateTimePicker>
+              }
           </View>
         
         </View>
         <View style={styles.button}>
           <Button
-            title='Add Center'
+            title='Create Event'
             onPress={() => this.storeUser()} 
-            color="#19AC52"
+            color="#000000"
           />
         </View>
         
@@ -169,9 +219,8 @@ const styles = StyleSheet.create({
   },
   datepicker: {
     flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: 'black',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
     paddingTop: 10,
     paddingBottom: 10,
   }

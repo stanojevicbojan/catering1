@@ -7,6 +7,8 @@ import firebase from '../../database/firebaseDb';
 import { View, Button, Icon, Fab } from 'native-base';
 import { Linking } from 'expo';
 import colors from '../../Colors'
+import * as Calendar from 'expo-calendar';
+import RNCalendarEvents from 'react-native-calendar-events';
 
 
 class CalendarsScreen extends Component {
@@ -16,6 +18,7 @@ class CalendarsScreen extends Component {
     this.firestoreRef = firebase.firestore().collection('calendar')
     this.calendarRef = firebase.firestore().collection('calendar')
     this.eventRemove = firebase.firestore().collection('calendar').doc('HHSziHpW6yHi73o6PvMc')
+
     this.state = {
       isLoading: true,
       userArr: [],
@@ -26,6 +29,14 @@ class CalendarsScreen extends Component {
   }
 
   componentDidMount() {
+    (async () => {
+      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      if (status === 'granted') {
+        const calendars = await Calendar.getCalendarsAsync();
+        console.log('Here are all your calendars:');
+        console.log({ calendars });
+      }
+    })();
     this.unsubscribe = this.firestoreRef.onSnapshot(this.getCollection);
     this.listener = firebase.firestore().collection('calendar').onSnapshot(snap => {
       const myItems = {}
@@ -87,19 +98,30 @@ class CalendarsScreen extends Component {
     }, 1000);
   }
 
+  createEvent(item) {
+    const eventId = Calendar.createEventAsync("1", {
+      endDate: item.dateEnd.toDate(),
+      location: item.location,
+      startDate: item.day.toDate(),
+      timeZone: "GMT-6",
+      title: item.name,
+    });
+  return eventId
+  }
+
   createThreeButtonAlert = (item) =>
     Alert.alert(
-      `Event name: ${item.name}`,
-      `Date: ${item.day.toDate()}`,
+      `${item.name}`,
+      `Starts: ${item.day.toDate().toString().substr(0,21)}\nEnds:${item.dateEnd.toDate().toString().substr(0,21)}, \nLocation: ${item.location}`,
       [
         {
-          text: "Add to calendar",
-          onPress: () => console.log("Ask me later pressed")
+          text: "Add to Google",
+          onPress: () => this.createEvent(item)
         },
         {
           text: "Delete",
           onPress: () => this.eventRemove.update({
-            "2020-07-13": firebase.firestore.FieldValue.arrayRemove({name: item.name, day: item.day}),
+            "2020-07-23": firebase.firestore.FieldValue.arrayRemove({dateEnd: item.dateEnd, day: item.day, location: item.location, name: item.name}),
           }),
           style: "cancel"
         },
@@ -117,8 +139,6 @@ class CalendarsScreen extends Component {
       >
         <Card>
           <Card.Content>
-          {console.log(item)}
-
             <View
               style={{
                 flexDirection: 'row',
@@ -129,7 +149,7 @@ class CalendarsScreen extends Component {
               }}
             >
               <Text>{item.name}</Text>
-              
+              {console.log(item.day.toDate())}
             </View>
           </Card.Content>
         </Card>
@@ -167,6 +187,7 @@ class CalendarsScreen extends Component {
             <Icon name="ios-add" />
           </Fab>
           </View>
+          {console.log(this.state.myItems.HHSziHpW6yHi73o6PvMc)}
       </View>
     );
   }
