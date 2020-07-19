@@ -174,7 +174,7 @@ class CalendarsScreen extends Component {
           selected={Date()}
           renderItem={this.renderItem.bind(this)}
           onDayPress={(day) => {console.log('selected day', day)}}
-          renderEmptyData={() => {return (<View><Text>No events for this day.</Text></View>);}}
+          renderEmptyData={() => {return (<View><Text style={{alignSelf: 'center', marginTop: 15}}>No events for this day.</Text></View>);}}
           firstDay={1}
           />
           <Fab

@@ -10,6 +10,8 @@ import MenuList from '../components/MenuList'
 import { Notifications } from 'expo';
 import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
+import firebase from '../database/firebaseDb';
+
 
 export default class ShoppingScreen extends React.Component {
     state = {
@@ -19,18 +21,19 @@ export default class ShoppingScreen extends React.Component {
         loading: true,
         userID: '',
         menu: [],
-        expoPushToken: []
+        expoPushToken: '',
+        usersTokens: []
     }
 
 
 
     componentDidMount() {
-        firebase = new Fire((error, user) => {
+        fireTodo = new Fire((error, user) => {
             if (error) {
                 return alert('Please login to use the app')
             }
 
-            firebase.getLists(lists => {
+            fireTodo.getLists(lists => {
                 this.setState({lists, user}, () => {
                     this.setState({ loading: false })
                 })
@@ -53,6 +56,30 @@ export default class ShoppingScreen extends React.Component {
         })
         // run function to send push notifications on mount
         this.registerForPushNotificationsAsync()
+
+       this.getAllTokens()
+                            
+
+    }
+
+    getAllTokens = () => {
+        //get all available tokens
+        const docRef = firebase.firestore().collection('notifications').doc('pushTokens').get().then((doc) => {
+                if (doc.exists) {
+                    const {
+                        tokens
+                    } = doc.data();
+                    
+                    this.setState({
+                    usersTokens: tokens
+                    })
+                } else {
+                    // doc.data() will be undefined in this case
+                    console.log("No such document!");
+                }
+            }).catch(function (error) {
+                console.log("Error getting document:", error);
+            });
     }
 
     registerForPushNotificationsAsync = async () => {
@@ -73,6 +100,10 @@ export default class ShoppingScreen extends React.Component {
         } else {
           alert('Must use physical device for Push Notifications');
         }
+
+        firebase.firestore().collection('notifications').doc('pushTokens').update({tokens: firebase.firestore.FieldValue.arrayUnion(this.state.expoPushToken)}).then(function() {
+            console.log("Document successfully written!");
+        });
       
         if (Platform.OS === 'android') {
           Notifications.createChannelAndroidAsync('default', {
@@ -85,27 +116,30 @@ export default class ShoppingScreen extends React.Component {
         };  
 
     sendPushNotification = async () => {
-        const message = {
-            to: this.state.expoPushToken,
-            sound: 'default',
-            title: 'Original Title',
-            body: 'And here is the body!',
-            data: { data: 'goes here' },
-            };
-            
-            await fetch('https://exp.host/--/api/v2/push/send', {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Accept-encoding': 'gzip, deflate',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(message),
-            });
+        for (let i = 0; i < this.state.usersTokens.length; i++) {
+            const message = {
+                to: this.state.usersTokens[i],
+                sound: 'default',
+                title: 'Original Title',
+                body: 'And here is the body!',
+                data: { data: 'goes here' },
+                };
+                
+                await fetch('https://exp.host/--/api/v2/push/send', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Accept-encoding': 'gzip, deflate',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message),
+                });
+        }
+
         }    
 
     componentWillUnmount() {
-        firebase.detach()
+        fireTodo.detach()
     }
 
 
@@ -125,7 +159,7 @@ export default class ShoppingScreen extends React.Component {
 
 
     addList = list => {
-        firebase.addList({
+        fireTodo.addList({
             name: list.name,
             color: list.color,
             todos: []
@@ -133,7 +167,7 @@ export default class ShoppingScreen extends React.Component {
     }
 
     updateList = list => {
-        firebase.updateList(list)
+        fireTodo.updateList(list)
     }
 
     updateMenu = list => {
