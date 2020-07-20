@@ -61,7 +61,7 @@ class CenterDetailScreen extends Component {
     const updateDBRef = firebase.firestore().collection('centers').doc(this.state.key);
     updateDBRef.set({
       name: this.state.name,
-      am: parseInt(this.state.am.replace(/[^0-9]/g, '')),
+      am: parseInt(this.state.am),//.replace(/[^0-9]/g, '')
       lunch: this.state.lunch,
       pm: parseInt(this.state.pm),
       maps: this.state.maps,

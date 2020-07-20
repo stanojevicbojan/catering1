@@ -120,8 +120,8 @@ export default class ShoppingScreen extends React.Component {
             const message = {
                 to: this.state.usersTokens[i],
                 sound: 'default',
-                title: 'Original Title',
-                body: 'And here is the body!',
+                title: 'E Nevena',
+                body: 'Koji sam kralj reeeciii',
                 data: { data: 'goes here' },
                 };
                 
@@ -155,8 +155,6 @@ export default class ShoppingScreen extends React.Component {
     renderMenu = list => {
         return <MenuList list={list} updateList={this.updateMenu}/>
     }
-
-
 
     addList = list => {
         fireTodo.addList({

@@ -19,20 +19,45 @@ class CentersScreen extends Component {
       amNumbersList: [],
       lunchNumbersList: [],
       pmNumbersList: [],
+      allAms: []
     };
   }
 
   componentDidMount() {
     this.unsubscribe = this.firestoreRef.onSnapshot(this.getCollection);
+    this.totals = this.firestoreRef.onSnapshot(this.getTotalNumbers)
   }
 
   componentWillUnmount(){
     this.unsubscribe();
+    this.totals();
   }
 
+  getTotalNumbers = () => {
+    const docRef = firebase.firestore().collection("centers").where("am", ">=", 0)
+    .get()
+    .then(querySnapshot => {
+      const amNumbersList = []
+      const lunchNumbersList = []
+      const pmNumbersList = []
+      querySnapshot.forEach(doc => {
+        amNumbersList.push(doc.data().am)
+        lunchNumbersList.push(doc.data().lunch)
+        pmNumbersList.push(doc.data().pm)
+          // doc.data() is never undefined for query doc snapshots
+          this.setState({
+            amNumbersList,
+            lunchNumbersList,
+            pmNumbersList
+          })
+      });
+  })
+    .catch(function(error) {
+        console.log("Error getting documents: ", error);
+    });
+  }
+  
   getCollection = (querySnapshot) => {
-    const allAmNumbers = [];
-    const allLunchNumbers = [];
     const allPmNumbers = [];
     const userArr = [];
     querySnapshot.forEach((res) => {
@@ -47,18 +72,10 @@ class CentersScreen extends Component {
         maps,
         phone,
       });
-      for (let u = 0; u < userArr.length; u++) {
-        allAmNumbers.push(userArr[u].am)
-        allLunchNumbers.push(userArr[u].lunch)
-        allPmNumbers.push(userArr[u].pm)
-      }
     });
     this.setState({
       userArr,
       isLoading: false,
-      amNumbersList: [...new Set(allAmNumbers)],
-      lunchNumbersList: [...new Set(allLunchNumbers)],
-      pmNumbersList: [...new Set(allPmNumbers)],
    });
   }
 
