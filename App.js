@@ -131,7 +131,7 @@ const AppTabNavigator = createBottomTabNavigator(
     Calendar: {
       screen: CalendarScreen,
       navigationOptions: {
-        tabBarIcon: ({tintColor}) => <MaterialCommunityIcons name='calendar' size={35} color={tintColor} />
+        tabBarIcon: ({tintColor}) => <MaterialCommunityIcons name='check-box-outline' size={35} color={tintColor} />
       }
     },
     Contacts: {

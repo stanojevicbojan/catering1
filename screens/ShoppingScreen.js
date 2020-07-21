@@ -75,7 +75,7 @@ export default class ShoppingScreen extends React.Component {
                     })
                 } else {
                     // doc.data() will be undefined in this case
-                    console.log("No such document!");
+                    console.log("No such document found!");
                 }
             }).catch(function (error) {
                 console.log("Error getting document:", error);
