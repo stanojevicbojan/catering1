@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Alert, Button, StyleSheet, TextInput, ScrollView, ActivityIndicator, View } from 'react-native';
+import { Alert, Button, StyleSheet, Text, TextInput, ScrollView, ActivityIndicator, View } from 'react-native';
 import firebase from '../../database/firebaseDb';
 import { openInbox } from 'react-native-email-link'
 import { Linking } from 'expo';
@@ -43,7 +43,51 @@ class CenterDetailScreen extends Component {
         console.log("Record does not exist!");
       }
     });
+
+    this.getAllTokens()
   }
+
+  getAllTokens = () => {
+    //get all available tokens
+    const docRef = firebase.firestore().collection('notifications').doc('pushTokens').get().then((doc) => {
+            if (doc.exists) {
+                const {
+                    tokens
+                } = doc.data();
+                
+                this.setState({
+                usersTokens: tokens
+                })
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+            }
+        }).catch(function (error) {
+            console.log("Error getting document:", error);
+        });
+}
+
+  sendPushNotification = async () => {
+    for (let i = 0; i < this.state.usersTokens.length; i++) {
+        const message = {
+            to: this.state.usersTokens[i],
+            sound: 'default',
+            title: 'Center update',
+            body: 'Center numbers were just updated!',
+            data: { data: 'goes here' },
+            };
+            
+            await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Accept-encoding': 'gzip, deflate',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+            });
+    }
+  } 
 
   inputValueUpdate = (val, prop) => {
     const state = this.state;
@@ -122,6 +166,7 @@ class CenterDetailScreen extends Component {
     return (
       <ScrollView style={styles.container}>
         <View style={styles.inputGroup}>
+          <Text>Name: </Text>
           <TextInput
               placeholder={'Center name'}
               value={this.state.name}
@@ -129,6 +174,7 @@ class CenterDetailScreen extends Component {
           />
         </View>
         <View style={styles.inputGroup}>
+        <Text>Phone: </Text>
           <TextInput
               placeholder={'Phone'}
               value={this.state.phone}
@@ -137,35 +183,37 @@ class CenterDetailScreen extends Component {
           />
         </View>
         <View style={styles.inputGroup}>
+          <Text>AM: </Text>
           <TextInput
-              //multiline={true}
-              //numberOfLines={4}
               placeholder={'AM'}
-              value={this.state.am}
+              value={String(this.state.am)}
               onChangeText={(val) => this.inputValueUpdate(val, 'am')}
               keyboardType={'numeric'}
           />
         </View>
         <View style={styles.inputGroup}>
+        <Text>Lunch: </Text>
           <TextInput
               placeholder={'Lunch'}
-              value={this.state.lunch}
+              value={String(this.state.lunch)}
               onChangeText={(val) => this.inputValueUpdate(val, 'lunch')}
               keyboardType={'numeric'}
           />
         </View>
         <View style={styles.inputGroup}>
+        <Text>PM: </Text>
           <TextInput
               placeholder={'PM'}
-              value={this.state.pm}
+              value={String(this.state.pm)}
               onChangeText={(val) => this.inputValueUpdate(val, 'pm')}
               keyboardType={'numeric'}
           />
         </View>
         <View style={styles.inputGroup}>
+        <Text>Maps: </Text>
           <TextInput
               placeholder={'Google Maps url'}
-              value={this.state.maps}
+              value={String(this.state.maps)}
               onChangeText={(val) => this.inputValueUpdate(val, 'maps')}
           />
         </View>
@@ -189,7 +237,7 @@ class CenterDetailScreen extends Component {
         <View style={styles.updateButton}>
           <Button
             title='Update'
-            onPress={() => this.updateUser()}
+            onPress={() => {this.sendPushNotification(); this.updateUser()}}
             color="#19AC52"
           />
           </View>
@@ -212,10 +260,12 @@ const styles = StyleSheet.create({
   },
   inputGroup: {
     flex: 1,
-    padding: 0,
+    flexDirection: 'row',
     marginBottom: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#cccccc',
+    padding: 0,
+    alignItems: 'center',
   },
   preloader: {
     left: 0,

@@ -97,8 +97,6 @@ export default class ShoppingScreen extends React.Component {
           const token = await Notifications.getExpoPushTokenAsync();
           console.log(token);
           this.setState({ expoPushToken: token });
-        } else {
-          alert('Must use physical device for Push Notifications');
         }
 
         firebase.firestore().collection('notifications').doc('pushTokens').update({tokens: firebase.firestore.FieldValue.arrayUnion(this.state.expoPushToken)}).then(function() {
@@ -135,8 +133,7 @@ export default class ShoppingScreen extends React.Component {
                 body: JSON.stringify(message),
                 });
         }
-
-        }    
+    }    
 
     componentWillUnmount() {
         fireTodo.detach()
@@ -201,7 +198,7 @@ export default class ShoppingScreen extends React.Component {
                         </Text>
                         <View style={styles.divider} />
                     </View>
-    {this.state.userID == 'Rgn6TGrPMkfEiusBy8p8XVv3aCb2' ? 
+                    {this.state.userID == 'Rgn6TGrPMkfEiusBy8p8XVv3aCb2' ? 
                     <View style={{marginVertical: 8}}>
                         <TouchableOpacity style={styles.addList} onPress={() => {this.toggleAddTodoModal(); this.sendPushNotification()}}>
                             <AntDesign name="plus" size={16} color={colors.blue} />
