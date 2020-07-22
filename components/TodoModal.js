@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, KeyboardAvoidingView, TextInput, Keyboard, Animated } from 'react-native';
 import { AntDesign, Ionicons } from '@expo/vector-icons'
 import colors from '../Colors'
+import firebase from '../database/firebaseDb';
+
 
 export default class TodoModal extends React.Component {
     state = {
@@ -33,6 +35,19 @@ export default class TodoModal extends React.Component {
         this.props.updateList(list)
     }
 
+    //resets current items in the Shopping list
+    resetShoppingList() {
+        //get all available tokens
+        const docRef = firebase.firestore().collection('users').doc('1mXHCyEEYnhyIqiqyeqi').collection('lists').doc('PHctNyYf5MHyofyNkW2j')
+
+        // Reset todos in the Shopping list
+        docRef.update({todos: firebase.firestore.FieldValue.delete()
+        });
+        docRef.update({todos: []
+        });
+        
+    }
+
     renderTodo = (todo, index) => {
         return (
                 <View style={styles.todoContainer}>
@@ -57,8 +72,8 @@ export default class TodoModal extends React.Component {
   render() {
       const list = this.props.list
       
-      const taskCount = list.todos.length
-      const completedCount = list.todos.filter(todo => todo.completed).length
+      const taskCount = list.todos == undefined ? 0 : list.todos.length
+      const completedCount = list.todos == undefined ? 0 : list.todos.filter(todo => todo.completed).length
 
     return (
         <KeyboardAvoidingView style={{flex: 1}} behavior="height">
@@ -72,6 +87,7 @@ export default class TodoModal extends React.Component {
 
                 <View style={[styles.section, styles.header, {borderBottomColor: list.color}]}>
                     <View>
+                        <TouchableOpacity onPress={() => this.resetShoppingList()}><Text>Reset list</Text></TouchableOpacity>
                         <Text style={styles.title}>{list.name}</Text>
                         <Text style={styles.taskCount}>
                             {completedCount} of {taskCount} tasks

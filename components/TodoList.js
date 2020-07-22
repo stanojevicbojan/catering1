@@ -3,6 +3,7 @@ import React from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Modal } from 'react-native'
 import colors from '../Colors'
 import TodoModal from './TodoModal'
+import firebase from '../database/firebaseDb';
 
 export default class TodoList extends React.Component {
     state = {
@@ -15,9 +16,8 @@ export default class TodoList extends React.Component {
 
     render() {
         const list = this.props.list
-
-        const completedCount = list.todos.filter(todo => todo.completed).length
-        const remainingCount = list.todos.length - completedCount
+        const completedCount = list.todos == undefined ? 0 : list.todos.filter(todo => todo.completed).length
+        const remainingCount = list.todos == undefined ? 0 : list.todos.length - completedCount
 
         return (
             <View>
@@ -40,9 +40,10 @@ export default class TodoList extends React.Component {
                 
 
                     <Text style={styles.listTitle} numberOfLines={1}>
-                        Date range:{list.name}
+                        {list.name}
                     </Text>
-        
+                    { list.name == 'Shopping list' ? 
+                    
                     <View>
                         <View style={{alignItems: 'center'}}>
                             <Text style={styles.count}>Completed: {completedCount}</Text>
@@ -50,9 +51,15 @@ export default class TodoList extends React.Component {
                         </View>
                         <View style={{alignItems: 'center'}}>
                             <Text style={styles.count}>Remaining: {remainingCount}</Text>
-                            {/* <Text style={styles.subtitle}>Remaining</Text> */}
                         </View>
-                    </View>
+                    </View> 
+                    : 
+                    <View>
+                        <View style={{alignItems: 'center'}}>
+                            <Text style={styles.count}> Request items to be purchased here</Text>
+                        </View>
+                    </View> }
+                    
                 </TouchableOpacity>
             </View>
             
@@ -67,16 +74,16 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         marginHorizontal: 12,
         alignItems: "center",
-        width: 250,
+        width: 170,
     },
     listTitle: {
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: "700",
         color: colors.white,
         marginBottom: 18,
     },
     count: {
-        fontSize: 28,
+        fontSize: 16,
         fontWeight: "700",
         color: colors.white
     },
