@@ -118,8 +118,8 @@ export default class ShoppingScreen extends React.Component {
             const message = {
                 to: this.state.usersTokens[i],
                 sound: 'default',
-                title: 'E Nevena',
-                body: 'Koji sam kralj reeeciii',
+                title: 'Shopping cart updated',
+                body: 'New items added to shopping cart!',
                 data: { data: 'goes here' },
                 };
                 
