@@ -149,7 +149,7 @@ const AppTabNavigator = createBottomTabNavigator(
     Calendars: {
       screen: CalendarNavigation,
       navigationOptions: {
-        tabBarIcon: ({tintColor}) => <MaterialCommunityIcons name='food' size={35} color={tintColor} />
+        tabBarIcon: ({tintColor}) => <MaterialCommunityIcons name='calendar-multiselect' size={35} color={tintColor} />
       },
     },
     Home: {

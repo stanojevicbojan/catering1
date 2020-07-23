@@ -13,13 +13,13 @@ export default class MenuModal extends React.Component {
 //adds one item in the array to shopping list 
     addToShoppingList = (index) => {
         let list = this.props.list
-        firebase.firestore().collection('users').doc('1mXHCyEEYnhyIqiqyeqi').collection('lists').doc('PHctNyYf5MHyofyNkW2j').update({todos: firebase.firestore.FieldValue.arrayUnion({"completed": false, "title": list.todos[index].title})}).then(alert("Item added to shopping list!"))
+        firebase.firestore().collection('users').doc('1mXHCyEEYnhyIqiqyeqi').collection('lists').doc('PHctNyYf5MHyofyNkW2j').update({todos: firebase.firestore.FieldValue.arrayUnion({"completed": true, "title": list.todos[index].title, "counter": list.todos[index].counter})}).then(alert("Item added to shopping list!"))
     }
 //adds all items from the array to shopping list 
     addAllToShoppingList = () => {
         let list = this.props.list
         for ( let i=0; i<list.todos.length; i++) {
-        firebase.firestore().collection('users').doc('1mXHCyEEYnhyIqiqyeqi').collection('lists').doc('PHctNyYf5MHyofyNkW2j').update({todos: firebase.firestore.FieldValue.arrayUnion({"completed": false, "title": list.todos[i].title})})
+        firebase.firestore().collection('users').doc('1mXHCyEEYnhyIqiqyeqi').collection('lists').doc('PHctNyYf5MHyofyNkW2j').update({todos: firebase.firestore.FieldValue.arrayUnion({"completed": true, "title": list.todos[i].title, "counter": list.todos[i].counter})})
         }
         alert("Items added to shopping list!")
     }
@@ -118,7 +118,6 @@ export default class MenuModal extends React.Component {
                         data={list.todos}
                         renderItem={({ item, index }) => 
                         <View style={styles.rowFront}>
-                            
                             <TouchableOpacity  onPress={() => this.decreaseAmount(index)}>
                             <Ionicons name={'ios-remove-circle'} size={38} color={"#E1E2E1"} />
                             </TouchableOpacity>
@@ -130,14 +129,14 @@ export default class MenuModal extends React.Component {
                             <Text style={[styles.todo]}>{item.title
                                 }
                             </Text>
-                            <TouchableOpacity style={styles.addToCart} onPress={() => this.addToShoppingList(index)}>
-                                <MaterialCommunityIcons name={'cart-arrow-up'} size={30} color={'#ec407a'} />
-                            </TouchableOpacity>
                         </View>
                         }
                         //this.renderTodo(item, index)}
                         renderHiddenItem={({ item, index }) => (
                             <View style={styles.rowBack}>
+                                <TouchableOpacity style={styles.addToCart} onPress={() => this.addToShoppingList(index)}>
+                                <MaterialCommunityIcons name={'cart-arrow-up'} size={30} color={'#ec407a'} />
+                                </TouchableOpacity>
                                 <TouchableOpacity
                                 style={[styles.backRightBtn, styles.backRightBtnRight]}
                                 onPress={() => this.deleteTodo(index)}
@@ -147,7 +146,7 @@ export default class MenuModal extends React.Component {
                             </View>
                         )}
                         keyExtractor={(_, index) => index.toString()}
-                        
+                        leftOpenValue={75}
                         rightOpenValue={-75}
                         contentContainerStyle={{paddingHorizontal: 32, paddingVertical: 64}}
                         showsVerticalScrollIndicator={false}

@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, KeyboardAvoidingView, TextInput, Keyboard, Animated } from 'react-native';
-import { AntDesign, Ionicons } from '@expo/vector-icons'
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, KeyboardAvoidingView, TextInput } from 'react-native';
+import { AntDesign, Ionicons, Fontisto } from '@expo/vector-icons'
 import colors from '../Colors'
 import firebase from '../database/firebaseDb';
+import { SwipeListView } from 'react-native-swipe-list-view';
 
 
 export default class TodoModal extends React.Component {
@@ -16,9 +17,25 @@ export default class TodoModal extends React.Component {
         this.props.updateList(list)
     }
 
+    increaseAmount = index => {
+        let list = this.props.list
+        list.todos[index].counter = list.todos[index].counter + 1
+        this.props.updateList(list)
+    }
+
+    decreaseAmount = index => {
+        let list = this.props.list
+        if (list.todos[index].counter > 0 ) {
+        list.todos[index].counter = list.todos[index].counter - 1
+        } else if (list.todos[index].counter == 0) {
+            list.todos[index].counter == 0
+        }
+        this.props.updateList(list)  
+    }
+
     addTodo = () => {
         let list = this.props.list
-        list.todos.push({title: this.state.newTodo, completed: false})
+        list.todos.push({title: this.state.newTodo, completed: false, counter:1})
 
         this.props.updateList(list)
         this.setState({newTodo: "" })
@@ -79,7 +96,7 @@ export default class TodoModal extends React.Component {
         <KeyboardAvoidingView style={{flex: 1}} behavior="height">
             <SafeAreaView style={styles.container}>
                 <TouchableOpacity 
-                    style={{position: "absolute", top: 64, right: 32, zIndex: 10}}
+                    style={{position: "absolute", top: 1, right: 32, zIndex: 10}}
                     onPress={this.props.closeModal}
                 >
                     <AntDesign name="close" size={24} color={colors.black} />
@@ -95,15 +112,45 @@ export default class TodoModal extends React.Component {
                     </View>
                 </View>
                 
-                <View style={[styles.section, {flex: 3}]}>
-                    <FlatList
-                        data={list.todos}
-                        renderItem={({ item, index }) => this.renderTodo(item, index)}
-                        keyExtractor={(_, index) => index.toString()}
-                        contentContainerStyle={{paddingHorizontal: 32, paddingVertical: 64}}
-                        showsVerticalScrollIndicator={false}
-                    />
-
+                <View style={[styles.section, {flex: 5}]}>
+                    <SwipeListView
+                            data={list.todos}
+                            renderItem={({ item, index }) => 
+                            <View style={styles.rowFront}>
+                                <View style={styles.listItems}>
+                                    <TouchableOpacity  onPress={() => this.decreaseAmount(index)}>
+                                    <Ionicons name={'ios-remove-circle'} size={38} color={"#E1E2E1"} />
+                                    </TouchableOpacity>
+                                    <Text style={styles.counterText}>{item.counter}</Text>
+                                    <TouchableOpacity  onPress={() => this.increaseAmount(index)}>
+                                    <Ionicons name={'ios-add-circle'} size={38} color={"#E1E2E1"} />
+                                    </TouchableOpacity>
+                                    <Text style={[styles.todo]}>{item.title}</Text>
+                                </View>
+                                <View style={styles.checkmark}>
+                                    <TouchableOpacity onPress={() => this.toggleTodoCompleted(index)}>
+                                    <Fontisto name={list.todos[index].completed == true ? 'checkbox-passive' : 'checkbox-active'} size={25} color={colors.gray} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            }
+                            //this.renderTodo(item, index)}
+                            renderHiddenItem={({ item, index }) => (
+                                <View style={styles.rowBack}>
+                                    <TouchableOpacity
+                                    style={[styles.backRightBtn, styles.backRightBtnRight]}
+                                    onPress={() => this.deleteTodo(index)}
+                                    >
+                                    <Text style={styles.backTextWhite}>Delete</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                            keyExtractor={(_, index) => index.toString()}
+                            
+                            rightOpenValue={-75}
+                            contentContainerStyle={{paddingHorizontal: 32, paddingVertical: 64}}
+                            showsVerticalScrollIndicator={false}
+                        />
                 </View>
                 <View style={[styles.section, styles.footer]}>
                     <TextInput 
@@ -129,8 +176,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'black',
+        marginTop: 40,
     },
     section: {
         flex: 1,
@@ -180,12 +226,85 @@ const styles = StyleSheet.create({
         color: colors.black,
         fontWeight: "700",
         fontSize: 16,
-        marginLeft: 8
+        marginLeft: 8,
+        maxWidth: 230,
     },
     deleteContainer: {
         flex: 1,
     },
     deleteButton: {
         alignSelf: 'flex-end'
+    },
+    backTextWhite: {
+        color: '#FFF',
+    },
+    rowFront: {
+        flexDirection: 'row',
+        flex: 1,
+        alignItems: 'center',
+        backgroundColor: '#fffffe',
+        borderBottomColor: '#f1f1f1',
+        borderBottomWidth: 1,
+        borderTopColor: '#f1f1f1',
+        borderTopWidth: 1,
+        height: 50,
+        marginBottom: 5,
+    },
+    listItems: {
+        flexDirection: 'row',
+        flex: 1,
+    },
+    checkmark: {
+        marginRight: 10,
+    },
+    rowBack: {
+        alignItems: 'center',
+        backgroundColor: '#f1f1f1',
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingLeft: 15,
+        marginBottom: 6,
+        
+    },
+    backRightBtn: {
+        alignItems: 'center',
+        bottom: 0,
+        justifyContent: 'center',
+        position: 'absolute',
+        top: 0,
+        width: 75,
+    },
+    backRightBtnLeft: {
+        backgroundColor: 'blue',
+        right: 75,
+    },
+    backRightBtnRight: {
+        backgroundColor: 'red',
+        right: 0,
+    },
+    counterText: {
+        fontSize: 25,
+        marginRight: 10,
+        marginLeft: 10,
+    },
+    addToCart: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+    addAllToCart: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        backgroundColor: '#009faf',
+        padding: 10,
+        borderRadius: 20,
+        marginBottom: -8,
+        marginLeft: -40,
+        marginRight: 10,
+    },
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center'
     }
 })
