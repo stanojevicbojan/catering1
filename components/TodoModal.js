@@ -1,14 +1,27 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, KeyboardAvoidingView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, KeyboardAvoidingView, TextInput, Alert } from 'react-native';
 import { AntDesign, Ionicons, Fontisto } from '@expo/vector-icons'
 import colors from '../Colors'
 import firebase from '../database/firebaseDb';
 import { SwipeListView } from 'react-native-swipe-list-view';
+import { Button, Paragraph, Dialog, Portal, Provider } from 'react-native-paper';
+import { Notifications } from 'expo';
+import * as Permissions from 'expo-permissions';
+import Constants from 'expo-constants';
 
 
 export default class TodoModal extends React.Component {
     state = {
-        newTodo: ""
+        newTodo: "",
+        expoPushToken: '',
+        usersTokens: []
+    }
+
+    componentDidMount() {
+        // run function to send push notifications on mount
+        this.registerForPushNotificationsAsync()
+
+        this.getAllTokens()
     }
 
     toggleTodoCompleted = index => {
@@ -85,18 +98,114 @@ export default class TodoModal extends React.Component {
         )
     }
 
+    createTwoButtonAlert = () =>
+    Alert.alert(
+      "Reset confirmation",
+      "Are you sure you want to create new shopping list? \n \nThis will delete all items in the shopping list.",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "OK", onPress: () => this.resetShoppingList() }
+      ],
+      { cancelable: false }
+    );
+
+    registerForPushNotificationsAsync = async () => {
+        if (Constants.isDevice) {
+          const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+          let finalStatus = existingStatus;
+          if (existingStatus !== 'granted') {
+            const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+            finalStatus = status;
+          }
+          if (finalStatus !== 'granted') {
+            alert('Failed to get push token for push notification!');
+            return;
+          }
+          const token = await Notifications.getExpoPushTokenAsync();
+          console.log(token);
+          this.setState({ expoPushToken: token });
+        }
+
+        firebase.firestore().collection('notifications').doc('pushTokens').update({tokens: firebase.firestore.FieldValue.arrayUnion(this.state.expoPushToken)}).then(function() {
+            console.log("Document successfully written!");
+        });
+      
+        if (Platform.OS === 'android') {
+          Notifications.createChannelAndroidAsync('default', {
+            name: 'default',
+            sound: true,
+            priority: 'max',
+            vibrate: [0, 250, 250, 250],
+          });
+        }
+    };  
+
+    getAllTokens = () => {
+        //get all available tokens
+        const docRef = firebase.firestore().collection('notifications').doc('pushTokens').get().then((doc) => {
+                if (doc.exists) {
+                    const {
+                        tokens
+                    } = doc.data();
+                    
+                    this.setState({
+                    usersTokens: tokens
+                    })
+                } else {
+                    // doc.data() will be undefined in this case
+                    console.log("No such document found!");
+                }
+            }).catch(function (error) {
+                console.log("Error getting document:", error);
+            });
+    } 
+
+    sendPushNotification = async () => {
+        for (let i = 0; i < this.state.usersTokens.length; i++) {
+            const message = {
+                to: this.state.usersTokens[i],
+                sound: 'default',
+                title: 'Shopping cart updated',
+                body: 'New items added to shopping cart!',
+                data: { data: 'goes here' },
+                };
+                
+                await fetch('https://exp.host/--/api/v2/push/send', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Accept-encoding': 'gzip, deflate',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message),
+                });
+        }
+    } 
+
+    //adds all items from the array to shopping list 
+    addAllToShoppingList = () => {
+        let list = this.props.list
+        for ( let i=0; i<list.todos.length; i++) {
+        firebase.firestore().collection('users').doc('1mXHCyEEYnhyIqiqyeqi').collection('lists').doc('PHctNyYf5MHyofyNkW2j').update({todos: firebase.firestore.FieldValue.arrayUnion({"completed": true, "title": list.todos[i].title, "counter": list.todos[i].counter})})
+        }
+        alert("Items added to shopping list!")
+    }
 
   render() {
       const list = this.props.list
       
-      const taskCount = list.todos == undefined ? 0 : list.todos.length
+      const taskCount = list.todos == undefined ? 0 : list.todos.length 
       const completedCount = list.todos == undefined ? 0 : list.todos.filter(todo => todo.completed).length
 
     return (
-        <KeyboardAvoidingView style={{flex: 1}} behavior="height">
+        <KeyboardAvoidingView style={{flex: 1, marginTop: 30,}} behavior="height">
             <SafeAreaView style={styles.container}>
                 <TouchableOpacity 
-                    style={{position: "absolute", top: 1, right: 32, zIndex: 10}}
+                    style={{position: "absolute", top: 30, right: 32, zIndex: 10}}
                     onPress={this.props.closeModal}
                 >
                     <AntDesign name="close" size={24} color={colors.black} />
@@ -104,14 +213,23 @@ export default class TodoModal extends React.Component {
 
                 <View style={[styles.section, styles.header, {borderBottomColor: list.color}]}>
                     <View>
-                        <TouchableOpacity onPress={() => this.resetShoppingList()}><Text>Reset list</Text></TouchableOpacity>
+                        
+                        {list.name == 'Shopping list' ?
+                        <View> 
+                        <Button style={styles.sendRequestButton} icon="delete" mode="contained" onPress={() => this.createTwoButtonAlert()}>Reset list</Button>
+                        </View>
+                        :
+                        <Button style={styles.sendRequestButton} icon="send" mode="contained" onPress={() => {this.addAllToShoppingList() ; this.sendPushNotification()}}>Send request</Button>
+                        }
+                        
                         <Text style={styles.title}>{list.name}</Text>
-                        <Text style={styles.taskCount}>
-                            {completedCount} of {taskCount} tasks
-                        </Text>
+                        {list.name == 'Shopping list' ? 
+                            <Text style={styles.taskCount}>
+                            {completedCount} items left to purchase!
+                            </Text>: null
+                        }
                     </View>
                 </View>
-                
                 <View style={[styles.section, {flex: 5}]}>
                     <SwipeListView
                             data={list.todos}
@@ -127,11 +245,14 @@ export default class TodoModal extends React.Component {
                                     </TouchableOpacity>
                                     <Text style={[styles.todo]}>{item.title}</Text>
                                 </View>
+                                {list.name == 'Shopping list' ?
                                 <View style={styles.checkmark}>
                                     <TouchableOpacity onPress={() => this.toggleTodoCompleted(index)}>
-                                    <Fontisto name={list.todos[index].completed == true ? 'checkbox-passive' : 'checkbox-active'} size={25} color={colors.gray} />
+                                    <Ionicons name={list.todos[index].completed == true ? 'ios-square-outline' : 'md-checkbox'} size={25} color={colors.gray} />
                                     </TouchableOpacity>
                                 </View>
+                                :
+                                null}
                             </View>
                             }
                             //this.renderTodo(item, index)}
@@ -152,7 +273,8 @@ export default class TodoModal extends React.Component {
                             showsVerticalScrollIndicator={false}
                         />
                 </View>
-                <View style={[styles.section, styles.footer]}>
+                { list.name !== 'Shopping list' ? 
+                    <View style={[styles.section, styles.footer]}>
                     <TextInput 
                         style={[styles.input, {borderColor: list.color}]}
                         onChangeText={text => this.setState({newTodo: text})}
@@ -164,7 +286,11 @@ export default class TodoModal extends React.Component {
                     >
                         <AntDesign name="plus" size={16} color={colors.white} />
                     </TouchableOpacity>
-                </View>
+                    </View>
+                    :
+                    null
+                }
+                
             </SafeAreaView>
         </KeyboardAvoidingView>
     );
@@ -176,21 +302,20 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: 'center',
-        marginTop: 40,
+        marginTop: 10,
     },
     section: {
         flex: 1,
         alignSelf: 'stretch'
     },
     header: {
-        justifyContent: 'flex-end',
-        marginLeft: 64,
-        borderBottomWidth: 3
+        marginLeft: 14,
     },
     title: {
         fontSize: 30,
         fontWeight: "700",
         color: colors.black,
+        marginBottom: 5
     },
     taskCount: {
         marginTop: 4,
@@ -228,6 +353,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginLeft: 8,
         maxWidth: 230,
+        alignSelf: 'center',
     },
     deleteContainer: {
         flex: 1,
@@ -265,7 +391,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingLeft: 15,
         marginBottom: 6,
-        
     },
     backRightBtn: {
         alignItems: 'center',
@@ -288,23 +413,14 @@ const styles = StyleSheet.create({
         marginRight: 10,
         marginLeft: 10,
     },
-    addToCart: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-    },
-    addAllToCart: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start',
-        backgroundColor: '#009faf',
-        padding: 10,
-        borderRadius: 20,
-        marginBottom: -8,
-        marginLeft: -40,
-        marginRight: 10,
-    },
     headerRow: {
         flexDirection: 'row',
         alignItems: 'center'
+    },
+    sendRequestButton: {
+        width: 170,
+    },
+    resetButton: {
+        marginTop: 50,
     }
 })

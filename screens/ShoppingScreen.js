@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, StyleSheet, TouchableOpacity, FlatList, Modal, Text, ActivityIndicator } from 'react-native'
+import { View, StyleSheet, TouchableOpacity, FlatList, Modal, Text, ActivityIndicator,  } from 'react-native'
 import { AntDesign } from "@expo/vector-icons"
 import colors from '../Colors'
 import TodoList from '../components/TodoList'
@@ -7,11 +7,7 @@ import AddListModal from '../components/AddListModal'
 import Fire from '../Fire'
 import FireMenu from '../api/FoodsApi'
 import MenuList from '../components/MenuList'
-import { Notifications } from 'expo';
-import * as Permissions from 'expo-permissions';
-import Constants from 'expo-constants';
 import firebase from '../database/firebaseDb';
-
 
 export default class ShoppingScreen extends React.Component {
     state = {
@@ -21,8 +17,6 @@ export default class ShoppingScreen extends React.Component {
         loading: true,
         userID: '',
         menu: [],
-        expoPushToken: '',
-        usersTokens: []
     }
 
 
@@ -54,86 +48,7 @@ export default class ShoppingScreen extends React.Component {
                 })
             })
         })
-        // run function to send push notifications on mount
-        this.registerForPushNotificationsAsync()
-
-       this.getAllTokens()
-                            
-
-    }
-
-    getAllTokens = () => {
-        //get all available tokens
-        const docRef = firebase.firestore().collection('notifications').doc('pushTokens').get().then((doc) => {
-                if (doc.exists) {
-                    const {
-                        tokens
-                    } = doc.data();
-                    
-                    this.setState({
-                    usersTokens: tokens
-                    })
-                } else {
-                    // doc.data() will be undefined in this case
-                    console.log("No such document found!");
-                }
-            }).catch(function (error) {
-                console.log("Error getting document:", error);
-            });
-    }
-
-    registerForPushNotificationsAsync = async () => {
-        if (Constants.isDevice) {
-          const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-          let finalStatus = existingStatus;
-          if (existingStatus !== 'granted') {
-            const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-            finalStatus = status;
-          }
-          if (finalStatus !== 'granted') {
-            alert('Failed to get push token for push notification!');
-            return;
-          }
-          const token = await Notifications.getExpoPushTokenAsync();
-          console.log(token);
-          this.setState({ expoPushToken: token });
-        }
-
-        firebase.firestore().collection('notifications').doc('pushTokens').update({tokens: firebase.firestore.FieldValue.arrayUnion(this.state.expoPushToken)}).then(function() {
-            console.log("Document successfully written!");
-        });
-      
-        if (Platform.OS === 'android') {
-          Notifications.createChannelAndroidAsync('default', {
-            name: 'default',
-            sound: true,
-            priority: 'max',
-            vibrate: [0, 250, 250, 250],
-          });
-        }
-        };  
-
-    sendPushNotification = async () => {
-        for (let i = 0; i < this.state.usersTokens.length; i++) {
-            const message = {
-                to: this.state.usersTokens[i],
-                sound: 'default',
-                title: 'Shopping cart updated',
-                body: 'New items added to shopping cart!',
-                data: { data: 'goes here' },
-                };
-                
-                await fetch('https://exp.host/--/api/v2/push/send', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Accept-encoding': 'gzip, deflate',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(message),
-                });
-        }
-    }    
+    }  
 
     componentWillUnmount() {
         fireTodo.detach()

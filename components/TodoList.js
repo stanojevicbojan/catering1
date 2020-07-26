@@ -5,6 +5,8 @@ import colors from '../Colors'
 import TodoModal from './TodoModal'
 import firebase from '../database/firebaseDb';
 
+
+
 export default class TodoList extends React.Component {
     state = {
         showListVisible: false
@@ -18,42 +20,48 @@ export default class TodoList extends React.Component {
         const list = this.props.list
         const completedCount = list.todos == undefined ? 0 : list.todos.filter(todo => todo.completed).length
         const remainingCount = list.todos == undefined ? 0 : list.todos.length - completedCount
+        const image = { uri: "https://firebasestorage.googleapis.com/v0/b/catering-app-25021.appspot.com/o/shopping-list-cover.jpg?alt=media&token=70b94d34-55cb-403f-9b77-061e9a4aac48" };
 
         return (
             <View>
+                
                 <Modal
                     animationType="slide" 
                     visible={this.state.showListVisible} 
                     onRequestClose={() => this.toggleListModal()}
                 >
+                    
                     <TodoModal 
                         list={list} 
                         closeModal={() => this.toggleListModal()}
                         updateList={this.props.updateList} 
                     />
+                    
                 </Modal>
+                
                 <TouchableOpacity 
                     style={[styles.listContainer, {backgroundColor: list.color}]}
                     onPress={() => this.toggleListModal()}
                 >
+                    
                     {this.state.showlistVisible}
-                
-
+                    
                     <Text style={styles.listTitle} numberOfLines={1}>
                         {list.name}
                     </Text>
                     { list.name == 'Shopping list' ? 
-                    
                     <View>
+                        
                         <View style={{alignItems: 'center'}}>
-                            <Text style={styles.count}>Completed: {completedCount}</Text>
-                           {/* <Text style={styles.subtitle}>Completed</Text> */}
+                            <Text style={styles.count}>Remaining: {completedCount}</Text>
                         </View>
                         <View style={{alignItems: 'center'}}>
-                            <Text style={styles.count}>Remaining: {remainingCount}</Text>
+                            <Text style={styles.count}>Completed: {remainingCount}</Text>
                         </View>
+                        
                     </View> 
                     : 
+                    
                     <View>
                         <View style={{alignItems: 'center'}}>
                             <Text style={styles.count}> Request items to be purchased here</Text>
@@ -91,6 +99,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "700",
         color: colors.white
-    }
+    },
+    image: {
+        flex: 1,
+        resizeMode: "cover",
+        justifyContent: "center"
+      },
 })
 
