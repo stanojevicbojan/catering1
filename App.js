@@ -26,7 +26,7 @@ import CentersScreen from './screens/centers/CentersScreen'
 import AddCenterScreen from './screens/centers/AddCenterScreen'
 import CenterDetailScreen from './screens/centers/CenterDetailScreen'
 
-import CalendarScreen from './screens/CalendarScreen'
+import Checklist from './screens/Checklist'
 
 import ContactsScreen from './screens/ContactsScreen'
 import AddUserScreen from './screens/AddUserScreen';
@@ -128,8 +128,8 @@ const AppTabNavigator = createBottomTabNavigator(
         tabBarIcon: ({tintColor}) => <MaterialCommunityIcons name='cart' size={35} color={tintColor} />
       }
     },
-    Calendar: {
-      screen: CalendarScreen,
+    Checklist: {
+      screen: Checklist,
       navigationOptions: {
         tabBarIcon: ({tintColor}) => <MaterialCommunityIcons name='check-box-outline' size={35} color={tintColor} />
       }
