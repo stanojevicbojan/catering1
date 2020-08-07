@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { View, Text, Platform, StyleSheet } from 'react-native';
+import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import firebase from '../database/firebaseDb';
+import { Table, TableWrapper, Cell, Row, Rows, Col } from 'react-native-table-component';
 
 export default class Checklist extends React.Component {
   constructor(props) {
@@ -13,8 +14,22 @@ export default class Checklist extends React.Component {
         itemInput: '',
         centerInput: '',
         myItems: {},
+        tableHead: ['', 'Head1', 'Head2', 'Head3', 'Head4', 'Head4', 'Head4'],
+        widthArr: [100, 100, 100, 100, 100, 100, 100],
+        rowWidth: [100, 100, 100, 100, 100, 100],
+        tableTitle: ['Title', 'Title2', 'Title3', 'Title4'],
+        tableData: [
+          ['1', '2', '3', 'false', 'false', 'Head4'],
+          ['a', 'b', 'c', 'false', 'false', 'Head4'],
+          ['1', '2', '3', 'false', 'false', 'Head4'],
+          ['a', 'b', 'c', 'false', 'false', 'Head4']
+        ],
       }
 
+    }
+
+    _alertIndex(index) {
+      Alert.alert(`This is row ${index + 1}`);
     }
 
   componentDidMount() {
@@ -35,6 +50,8 @@ export default class Checklist extends React.Component {
   render () {
     const itemInput = this.state.itemInput
     const centerInput = this.state.centerInput
+    const state = this.state;
+
     return (
       <View style={styles.container}>
         <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
@@ -49,6 +66,7 @@ export default class Checklist extends React.Component {
           </Button>
         </View>
 
+      
         <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
           <TextInput
             style={{flex: 6,height: 50,}}
@@ -61,6 +79,21 @@ export default class Checklist extends React.Component {
           </Button>
         </View>
         {console.log(this.state.myItems)}
+        
+      <View style={styles.container1}>
+        <ScrollView horizontal={true}>
+          <View style={styles.container}>
+            <Table borderStyle={{borderWidth: 1}}>
+              <Row  data={state.tableHead} widthArr={state.widthArr} flexArr={[1, 1, 1, 1, 1]} style={styles.head} textStyle={styles.text}/>
+              <TableWrapper style={styles.wrapper}>
+                <Col data={state.tableTitle} style={styles.title} heightArr={[28,28]} textStyle={styles.text}/>
+                <Rows  widthArr={state.rowWidth} data={state.tableData} flexArr={[1, 1, 1, 1, 1]} style={styles.row} textStyle={styles.text}/>
+              </TableWrapper>
+            </Table>
+          </View>
+          </ScrollView>
+      </View>
+
       </View>
     )
   }
@@ -68,8 +101,11 @@ export default class Checklist extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 40,
-  },
+  container: { flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff' },
+  container1: { flex: 1, padding: 6, paddingTop: 3, backgroundColor: '#fff', borderWidth: 2, borderColor: 'black'},
+  head: {  height: 28,  backgroundColor: '#f1f8ff'  },
+  wrapper: { flexDirection: 'row' },
+  title: { flex: 1, backgroundColor: '#f6f8fa', width: 100 },
+  row: {  height: 28},
+  text: { textAlign: 'center' }
 });
