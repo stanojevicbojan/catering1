@@ -14,15 +14,13 @@ export default class Checklist extends React.Component {
         itemInput: '',
         centerInput: '',
         myItems: {},
-        tableHead: ['', 'Head1', 'Head2', 'Head3', 'Head4', 'Head4', 'Head4'],
-        widthArr: [100, 100, 100, 100, 100, 100, 100],
+        tableHead: [],
+        widthArr: [250, 300, 300], // Width of each column
         rowWidth: [100, 100, 100, 100, 100, 100],
-        tableTitle: ['Title', 'Title2', 'Title3', 'Title4'],
+        tableTitle: [],
         tableData: [
-          ['1', '2', '3', 'false', 'false', 'Head4'],
-          ['a', 'b', 'c', 'false', 'false', 'Head4'],
-          ['1', '2', '3', 'false', 'false', 'Head4'],
-          ['a', 'b', 'c', 'false', 'false', 'Head4']
+          ['1', '2'],
+          ['a', 'b'],
         ],
       }
 
@@ -34,11 +32,16 @@ export default class Checklist extends React.Component {
 
   componentDidMount() {
     this.listener = firebase.firestore().collection('checklist').onSnapshot(snap => {
-      const myItems = {}
+      const myItems = {};
+      const tableTitle = [];
+      let tableHead;
       snap.forEach(item => {
         myItems[item.id] = item.data()
+        tableTitle.push(item.data().name)
+        tableHead = Object.keys(item.data().checkmarks[0])
       })
-      this.setState({myItems})
+      tableHead.unshift('')
+      this.setState({myItems, tableTitle, tableHead})
     })
 }  
 
@@ -54,6 +57,19 @@ export default class Checklist extends React.Component {
 
     return (
       <View style={styles.container}>
+        <View style={styles.container1}>
+          <ScrollView horizontal={true}>
+            <View style={styles.container}>
+              <Table borderStyle={{borderWidth: 1}}>
+                <Row  data={state.tableHead} widthArr={state.widthArr} style={styles.head} textStyle={styles.text}/>
+                <TableWrapper style={styles.wrapper}>
+                  <Col data={state.tableTitle} style={styles.title} heightArr={[28,28]} textStyle={styles.text}/>
+                  <Rows  widthArr={state.rowWidth} data={state.tableData} flexArr={[1, 1, 1, 1, 1]} style={styles.row} textStyle={styles.text}/>
+                </TableWrapper>
+              </Table>
+            </View>
+          </ScrollView>
+        </View>
         <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
           <TextInput
             style={{flex: 6,height: 50,}}
@@ -65,8 +81,6 @@ export default class Checklist extends React.Component {
           Add item
           </Button>
         </View>
-
-      
         <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
           <TextInput
             style={{flex: 6,height: 50,}}
@@ -78,22 +92,7 @@ export default class Checklist extends React.Component {
           Add center
           </Button>
         </View>
-        {console.log(this.state.myItems)}
-        
-      <View style={styles.container1}>
-        <ScrollView horizontal={true}>
-          <View style={styles.container}>
-            <Table borderStyle={{borderWidth: 1}}>
-              <Row  data={state.tableHead} widthArr={state.widthArr} flexArr={[1, 1, 1, 1, 1]} style={styles.head} textStyle={styles.text}/>
-              <TableWrapper style={styles.wrapper}>
-                <Col data={state.tableTitle} style={styles.title} heightArr={[28,28]} textStyle={styles.text}/>
-                <Rows  widthArr={state.rowWidth} data={state.tableData} flexArr={[1, 1, 1, 1, 1]} style={styles.row} textStyle={styles.text}/>
-              </TableWrapper>
-            </Table>
-          </View>
-          </ScrollView>
-      </View>
-
+        {console.log(this.state.foodColumns)}
       </View>
     )
   }
@@ -105,7 +104,7 @@ const styles = StyleSheet.create({
   container1: { flex: 1, padding: 6, paddingTop: 3, backgroundColor: '#fff', borderWidth: 2, borderColor: 'black'},
   head: {  height: 28,  backgroundColor: '#f1f8ff'  },
   wrapper: { flexDirection: 'row' },
-  title: { flex: 1, backgroundColor: '#f6f8fa', width: 100 },
+  title: { flex: 1, backgroundColor: '#f6f8fa', width: 250 },
   row: {  height: 28},
   text: { textAlign: 'center' }
 });
