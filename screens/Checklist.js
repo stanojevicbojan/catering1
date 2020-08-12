@@ -23,23 +23,13 @@ export default class Checklist extends React.Component {
         tableData: [],
         numOfCols: [],
         loading: true,
-        switch: false,
       }
 
     }
 
-    toggle = () => {
-      let switcharoo
-      switcharoo = !this.state.switch
-      this.setState({
-        switch: switcharoo
-      })
-    }
-
-
     _alertIndex(index, cellIndex) {
       //Alert.alert(`This is row ${this.state.tableTitle[index]}, while column is ${this.state.tableHead[cellIndex + 1]}`);
-      let toggle = this.state.switch
+      let toggle = !this.state.tableData[index][cellIndex]
       let name = "checkmark.".concat(this.state.tableHead[cellIndex + 1])
       let checkboxUpdate = firebase.firestore().collection('checklist')
       checkboxUpdate.where("name", "==", this.state.tableTitle[index])
@@ -92,10 +82,11 @@ export default class Checklist extends React.Component {
     const state = this.state;
     //this._alertIndex(index, cellIndex)
     const element = (data, index, cellIndex) => (
-      <TouchableOpacity onPress={() => {this.toggle(); this._alertIndex(index, cellIndex)}  }>
+    
+      <TouchableOpacity onPress={() => this._alertIndex(index, cellIndex)  }>
           <Ionicons style={styles.checkmark} name={this.state.tableData[index][cellIndex] == false ? 'ios-square-outline' : 'md-checkbox'} size={25} color={colors.gray} />
       </TouchableOpacity>
-      
+    
     );
 
     return (
