@@ -66,13 +66,13 @@ class ContactsScreen extends Component {
     }    
     return (
     <View style={styles.container}>
-            <View style={{flexDirection: "row", marginTop: 20,}}>
-                    <View style={styles.divider} />
-                    <Text style={styles.title}>
-                        Contacts <Text style={{fontWeight: "300", color: colors.pink}}>List</Text>
-                    </Text>
-                    <View style={styles.divider} />
-                </View>
+       <View style={{flexDirection: "row", marginTop: 20,}}>
+         <View style={styles.divider} />
+         <Text style={styles.title}>
+             Contacts <Text style={{fontWeight: "300", color: colors.pink}}>List</Text>
+         </Text>
+         <View style={styles.divider} />
+       </View>
       <ScrollView>
        
           {

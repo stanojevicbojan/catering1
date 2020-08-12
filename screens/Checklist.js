@@ -101,6 +101,13 @@ export default class Checklist extends React.Component {
     return (
       <View style={styles.container}>
         <View style={styles.container1}>
+          <View style={{flexDirection: "row", marginTop: -10,}}>
+            <View style={styles.divider} />
+              <Text style={styles.header}>
+             Check<Text style={{fontWeight: "300", color: '#2196f3'}}>List</Text>
+              </Text>
+            <View style={styles.divider} />
+          </View>
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
             <View style={styles.container}>
               {/* borderStyle={{borderWidth: 1}} */}
@@ -169,5 +176,17 @@ const styles = StyleSheet.create({
   row: {  height: 20},
   text: { textAlign: 'center', color: 'white', fontWeight: '700'},
   checkmark: { alignSelf: 'center'},
-  cell: {height: 60, width: 200}
+  cell: {height: 60, width: 200},
+  divider: {
+      backgroundColor: colors.lightBlue,
+      height: 1,
+      flex: 1,
+      alignSelf: 'center'
+  },
+  header: {
+      fontSize: 38,
+      fontWeight: "700",
+      color: colors.black,
+      paddingHorizontal: 64,
+  },
 });

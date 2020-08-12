@@ -167,6 +167,13 @@ class CalendarsScreen extends Component {
     }    
     return (
     <View style={styles.container}>
+      <View style={{flexDirection: "row", marginTop: 20,marginBottom: -20}}>
+        <View style={styles.headerDivider} />
+          <Text style={styles.mainHeader}>
+         Calendar<Text style={{fontWeight: "300", color: '#009688'}}></Text>
+          </Text>
+        <View style={styles.headerDivider} />
+      </View>
       <View style={{flex: 1, marginTop:30,}}>
         <Agenda
           items={this.state.myItems.HHSziHpW6yHi73o6PvMc}
@@ -215,6 +222,18 @@ const styles = StyleSheet.create({
   },
   title: {
       fontSize: 28,
+      fontWeight: "700",
+      color: colors.black,
+      paddingHorizontal: 64,
+  },
+  headerDivider: {
+      backgroundColor: colors.lightBlue,
+      height: 1,
+      flex: 1,
+      alignSelf: 'center'
+  },
+  mainHeader: {
+      fontSize: 38,
       fontWeight: "700",
       color: colors.black,
       paddingHorizontal: 64,
