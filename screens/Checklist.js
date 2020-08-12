@@ -66,8 +66,8 @@ export default class Checklist extends React.Component {
       snap.forEach(item => {
         myItems[item.id] = item.data()
         tableTitle.push(item.data().name)
-        tableHead = Object.keys(item.data().checkmarks[0])
-        tableData.push(Object.values(item.data().checkmarks[0]))
+        tableHead = Object.keys(item.data().checkmark)
+        tableData.push(Object.values(item.data().checkmark))
       })
       tableHead.unshift('')
       this.setState({myItems, tableTitle, tableHead, tableData, loading: false})
@@ -93,9 +93,7 @@ export default class Checklist extends React.Component {
     //this._alertIndex(index, cellIndex)
     const element = (data, index, cellIndex) => (
       <TouchableOpacity onPress={() => {this.toggle(); this._alertIndex(index, cellIndex)}  }>
-        <View style={styles.btn}>
-          <Text style={styles.btnText}>yes</Text>
-        </View>
+          <Ionicons style={styles.checkmark} name={this.state.tableData[index][cellIndex] == false ? 'ios-square-outline' : 'md-checkbox'} size={25} color={colors.gray} />
       </TouchableOpacity>
       
     );
@@ -105,12 +103,13 @@ export default class Checklist extends React.Component {
         <View style={styles.container1}>
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
             <View style={styles.container}>
-              <Table borderStyle={{borderWidth: 1}}>
+              {/* borderStyle={{borderWidth: 1}} */}
+              <Table>
                 <TableWrapper>
                 <Row  data={state.tableHead} widthArr={state.widthArr} style={styles.head} textStyle={styles.text}/>
                 </TableWrapper>
-                <TableWrapper>
-                <Col data={state.tableTitle} style={styles.title} heightArr={[21,21]} textStyle={styles.text}/>
+                <TableWrapper style={{backgroundColor: '#e8eaf6'}}>
+                <Col data={state.tableTitle} style={styles.title} heightArr={[60, 60]} textStyle={styles.textCol}/>
                 {
                   state.tableData.map((rowData, index) => (
                     
@@ -118,7 +117,7 @@ export default class Checklist extends React.Component {
                       {/*<Text>{console.log(rowData)}</Text> */}
                       {
                         rowData.map((cellData, cellIndex) => (
-                          <Cell key={cellIndex} data={cellIndex >= 0 ? element(cellData, index, cellIndex) : cellData} textStyle={styles.text}/>
+                          <Cell style={styles.cell} key={cellIndex} data={cellIndex >= 0 ? element(cellData, index, cellIndex) : cellData} textStyle={styles.text}/>
                           
                         ))
                       }
@@ -161,13 +160,14 @@ export default class Checklist extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 6, paddingTop: 30, backgroundColor: '#fff' },
-  container1: { flex: 1, padding: 3, paddingTop: 3, backgroundColor: '#fff', borderWidth: 2, borderColor: 'black'},
-  head: {  height: 20,  backgroundColor: '#f1f8ff'  },
+  container: { flex: 1, padding: 6, paddingTop: 30, backgroundColor: '#fff', paddingRight: 0 },
+  container1: { flex: 1, padding: 3, paddingTop: 3, backgroundColor: '#fff', borderColor: 'black',paddingRight: 0},
+  head: {  height: 60,  backgroundColor: '#3f51b5'  },
   wrapper: { flexDirection: 'row', marginLeft: 200 },
-  title: { flex: 1, backgroundColor: '#f6f8fa', width: 200 },
+  title: { flex: 1, backgroundColor: 'black', width: 200 },
+  textCol: {textAlign: 'center', fontWeight: '700', color: '#474747'},
   row: {  height: 20},
-  text: { textAlign: 'center' },
-  btn: { alignSelf: 'center', width: 24, height: 20, backgroundColor: '#78B7BB',  borderRadius: 2 },
-  btnText: { textAlign: 'center', color: '#fff',  }
+  text: { textAlign: 'center', color: 'white', fontWeight: '700'},
+  checkmark: { alignSelf: 'center'},
+  cell: {height: 60, width: 200}
 });
