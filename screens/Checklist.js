@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import firebase from '../database/firebaseDb';
 import { Table, TableWrapper, Cell, Row, Rows, Col } from 'react-native-table-component';
+import colors from '../Colors'
+import { Ionicons } from '@expo/vector-icons'
 
 export default class Checklist extends React.Component {
   constructor(props) {
@@ -16,18 +18,43 @@ export default class Checklist extends React.Component {
         myItems: {},
         tableHead: [],
         widthArr: [200, 200, 200, 200], // Width of each column
-        rowWidth: [100, 100, 100, 100, 100, 100],
+        //rowWidth: [200, 100, 100, 100, 100, 100],
         tableTitle: [],
-        tableData: [
-          ['1', '2'],
-          ['a', 'b'],
-        ],
+        tableData: [],
+        numOfCols: [],
+        loading: true,
+        switch: false,
       }
 
     }
 
-    _alertIndex(index) {
-      Alert.alert(`This is row ${index + 1}`);
+    toggle = () => {
+      let switcharoo
+      switcharoo = !this.state.switch
+      this.setState({
+        switch: switcharoo
+      })
+    }
+
+
+    _alertIndex(index, cellIndex) {
+      //Alert.alert(`This is row ${this.state.tableTitle[index]}, while column is ${this.state.tableHead[cellIndex + 1]}`);
+      let toggle = this.state.switch
+      let name = "checkmark.".concat(this.state.tableHead[cellIndex + 1])
+      let checkboxUpdate = firebase.firestore().collection('checklist')
+      checkboxUpdate.where("name", "==", this.state.tableTitle[index])
+        .get()
+        .then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+                // doc.data() is never undefined for query doc snapshots, doc.data() returns all data in document
+                return checkboxUpdate.doc(doc.id).update({
+                 [`${name}`]: toggle
+              })
+            });
+        })
+        .catch(function(error) {
+            console.log("Error getting documents: ", error);
+        });
     }
 
   componentDidMount() {
@@ -42,9 +69,8 @@ export default class Checklist extends React.Component {
         tableHead = Object.keys(item.data().checkmarks[0])
         tableData.push(Object.values(item.data().checkmarks[0]))
       })
-      console.log(tableHead)
       tableHead.unshift('')
-      this.setState({myItems, tableTitle, tableHead, tableData})
+      this.setState({myItems, tableTitle, tableHead, tableData, loading: false})
     })
 }  
 
@@ -52,24 +78,26 @@ export default class Checklist extends React.Component {
     this.listener();
 }
 
-toggleTodoCompleted = index => {
-  let list = this.props.list
-  list.todos[index].completed = !list.todos[index].completed
-  this.props.updateList(list)
-}
-
-
   render () {
+    if (this.state.loading) {
+      return (
+      <View style={styles.container}>
+          <ActivityIndicator size='large' color={colors.blue}/>
+      </View>
+      )
+    }
+
     const itemInput = this.state.itemInput
     const centerInput = this.state.centerInput
     const state = this.state;
-
-    const element = (data, index) => (
-      <TouchableOpacity onPress={() => this._alertIndex(index)}>
+    //this._alertIndex(index, cellIndex)
+    const element = (data, index, cellIndex) => (
+      <TouchableOpacity onPress={() => {this.toggle(); this._alertIndex(index, cellIndex)}  }>
         <View style={styles.btn}>
-          <Text style={styles.btnText}>button</Text>
+          <Text style={styles.btnText}>yes</Text>
         </View>
       </TouchableOpacity>
+      
     );
 
     return (
@@ -78,19 +106,27 @@ toggleTodoCompleted = index => {
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
             <View style={styles.container}>
               <Table borderStyle={{borderWidth: 1}}>
+                <TableWrapper>
                 <Row  data={state.tableHead} widthArr={state.widthArr} style={styles.head} textStyle={styles.text}/>
+                </TableWrapper>
+                <TableWrapper>
+                <Col data={state.tableTitle} style={styles.title} heightArr={[21,21]} textStyle={styles.text}/>
                 {
                   state.tableData.map((rowData, index) => (
+                    
                     <TableWrapper key={index} style={styles.wrapper}>
+                      {/*<Text>{console.log(rowData)}</Text> */}
                       {
                         rowData.map((cellData, cellIndex) => (
-                          <Cell key={cellIndex} data={cellIndex === 1 ? element(cellData, index) : cellData} textStyle={styles.text}/>
+                          <Cell key={cellIndex} data={cellIndex >= 0 ? element(cellData, index, cellIndex) : cellData} textStyle={styles.text}/>
+                          
                         ))
                       }
+                     
                     </TableWrapper>
                   ))
                  }
-
+                </TableWrapper>
                 {/*
                 <TableWrapper style={styles.wrapper}>
                   <Col data={state.tableTitle} style={styles.title} heightArr={[28,28]} textStyle={styles.text}/>
@@ -125,11 +161,13 @@ toggleTodoCompleted = index => {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff' },
-  container1: { flex: 1, padding: 6, paddingTop: 3, backgroundColor: '#fff', borderWidth: 2, borderColor: 'black'},
-  head: {  height: 28,  backgroundColor: '#f1f8ff'  },
-  wrapper: { flexDirection: 'row' },
-  title: { flex: 1, backgroundColor: '#f6f8fa', width: 200, flexDirection: 'row' },
-  row: {  height: 28},
-  text: { textAlign: 'center' }
+  container: { flex: 1, padding: 6, paddingTop: 30, backgroundColor: '#fff' },
+  container1: { flex: 1, padding: 3, paddingTop: 3, backgroundColor: '#fff', borderWidth: 2, borderColor: 'black'},
+  head: {  height: 20,  backgroundColor: '#f1f8ff'  },
+  wrapper: { flexDirection: 'row', marginLeft: 200 },
+  title: { flex: 1, backgroundColor: '#f6f8fa', width: 200 },
+  row: {  height: 20},
+  text: { textAlign: 'center' },
+  btn: { alignSelf: 'center', width: 24, height: 20, backgroundColor: '#78B7BB',  borderRadius: 2 },
+  btnText: { textAlign: 'center', color: '#fff',  }
 });
