@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, Alert, ActivityIndicator, Modal, Animated } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import firebase from '../database/firebaseDb';
 import { Table, TableWrapper, Cell, Row, Rows, Col } from 'react-native-table-component';
 import colors from '../Colors'
 import { Ionicons } from '@expo/vector-icons'
+import {Icon, Fab } from 'native-base';
 
 export default class Checklist extends React.Component {
   constructor(props) {
@@ -23,6 +24,8 @@ export default class Checklist extends React.Component {
         tableData: [],
         numOfCols: [],
         loading: true,
+        modalVisible: false,
+        colHeightArr: []
       }
 
     }
@@ -62,10 +65,42 @@ export default class Checklist extends React.Component {
       tableHead.unshift('')
       this.setState({myItems, tableTitle, tableHead, tableData, loading: false})
     })
+
+    this.getHeight = firebase.firestore().collection('lists').onSnapshot(snap => {
+      let colHeightArr = []
+      snap.forEach(item => {
+        colHeightArr = item.data().colHeight
+      })
+      this.setState({colHeightArr})
+    })
+
 }  
 
   componentWillUnmount() {
     this.listener();
+    this.getHeight();
+}
+
+setModalVisible = (visible) => {
+  this.setState({ modalVisible: visible });
+}
+
+addCenter = () => {
+  let updatedHeight = this.state.colHeightArr
+  updatedHeight.push(60)
+  firebase.firestore().collection("checklist").doc(this.state.centerInput).set({
+    checkmark: this.state.tableData[0],
+    id: this.state.centerInput,
+    name: this.state.centerInput,
+  })
+  .then(function() {
+      firebase.firestore().collection("lists").doc("height").update({
+        colHeight: updatedHeight
+      })
+  })
+  .catch(function(error) {
+      console.error("Error writing document: ", error);
+  });
 }
 
   render () {
@@ -76,7 +111,7 @@ export default class Checklist extends React.Component {
       </View>
       )
     }
-
+    const { modalVisible } = this.state;
     const itemInput = this.state.itemInput
     const centerInput = this.state.centerInput
     const state = this.state;
@@ -91,6 +126,47 @@ export default class Checklist extends React.Component {
 
     return (
       <View style={styles.container}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            Alert.alert("Modal has been closed.");
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+            <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
+              <TextInput
+                style={{flex: 6,height: 50,}}
+                label="New item"
+                value={itemInput}
+                onChangeText={itemInput => this.setState({itemInput})}
+              />
+              <Button style={{flex: 2, height: 50, padding: 2, marginLeft: 3,}} mode="contained" onPress={() => console.log('Pressed')}><Text>Add item</Text></Button>
+            </View>
+            <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
+              <TextInput
+                style={{flex: 6,height: 50,}}
+                label="New center"
+                value={centerInput}
+                onChangeText={centerInput => this.setState({centerInput})}
+              />
+              <Button style={{flex: 2, height: 50, padding: 2, marginLeft: 3,}} mode="contained" onPress={() => this.addCenter()}><Text>Add center</Text></Button>
+            </View>
+
+              <TouchableHighlight
+                style={{ ...styles.openButton, backgroundColor: "#3f51b5" }}
+                onPress={() => {
+                  this.setModalVisible(!modalVisible);
+                }}
+              >
+                <Text style={styles.textStyle}>Close</Text>
+              </TouchableHighlight>
+            </View>
+          </View>
+        </Modal>
+
         <View style={styles.container1}>
           <View style={{flexDirection: "row", marginTop: -10,}}>
             <View style={styles.divider} />
@@ -107,7 +183,7 @@ export default class Checklist extends React.Component {
                 <Row  data={state.tableHead} widthArr={state.widthArr} style={styles.head} textStyle={styles.text}/>
                 </TableWrapper>
                 <TableWrapper style={{backgroundColor: '#e8eaf6'}}>
-                <Col data={state.tableTitle} style={styles.title} heightArr={[60, 60]} textStyle={styles.textCol}/>
+                <Col data={state.tableTitle} style={styles.title} heightArr={this.state.colHeightArr} textStyle={styles.textCol}/>
                 {
                   state.tableData.map((rowData, index) => (
                     
@@ -133,23 +209,21 @@ export default class Checklist extends React.Component {
             </View>
           </ScrollView>
         </View>
-        <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
-          <TextInput
-            style={{flex: 6,height: 50,}}
-            label="New item"
-            value={itemInput}
-            onChangeText={itemInput => this.setState({itemInput})}
-          />
-          <Button style={{flex: 2, height: 50, padding: 2, marginLeft: 3,}}  mode="contained" onPress={() => console.log('Pressed')}>Add item</Button>
-        </View>
-        <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
-          <TextInput
-            style={{flex: 6,height: 50,}}
-            label="New center"
-            value={centerInput}
-            onChangeText={centerInput => this.setState({centerInput})}
-          />
-          <Button style={{flex: 2, height: 50, padding: 2, marginLeft: 3,}}  mode="contained" onPress={() => console.log('Pressed')}>Add center</Button>
+        
+
+
+        <View>
+          <Fab
+            active={this.state.active}
+            direction="up"
+            containerStyle={{ }}
+            style={{ backgroundColor: '#5067FF' }}
+            position="bottomRight"
+            onPress={() => {
+              this.setModalVisible(true);
+            }}>
+            <Icon name="ios-add" />
+          </Fab>
         </View>
       </View>
     )
@@ -162,7 +236,7 @@ const styles = StyleSheet.create({
   container1: { flex: 1, padding: 3, paddingTop: 3, backgroundColor: '#fff', borderColor: 'black',paddingRight: 0},
   head: {  height: 60,  backgroundColor: '#3f51b5'  },
   wrapper: { flexDirection: 'row', marginLeft: 200 },
-  title: { flex: 1, backgroundColor: 'black', width: 200 },
+  title: { flex: 1, backgroundColor: 'black', width: 200,},
   textCol: {textAlign: 'center', fontWeight: '700', color: '#474747'},
   row: {  height: 20},
   text: { textAlign: 'center', color: 'white', fontWeight: '700'},
@@ -179,5 +253,41 @@ const styles = StyleSheet.create({
       fontWeight: "700",
       color: colors.black,
       paddingHorizontal: 64,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10
+  },
+  modalView: {
+    margin: 5,
+    backgroundColor: "white",
+    borderRadius: 0,
+    padding: 10,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5
+  },
+  openButton: {
+    backgroundColor: "#3f51b5",
+    borderRadius: 2,
+    padding: 10,
+    elevation: 2
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center"
   },
 });

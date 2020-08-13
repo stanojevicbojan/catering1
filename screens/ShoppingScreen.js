@@ -113,15 +113,16 @@ export default class ShoppingScreen extends React.Component {
                         </Text>
                         <View style={styles.divider} />
                     </View>
+                    {/* Hiding add shopping list functionality
                     {this.state.userID == 'Rgn6TGrPMkfEiusBy8p8XVv3aCb2' ? 
                     <View style={{marginVertical: 8}}>
                         <TouchableOpacity style={styles.addList} onPress={() => {this.toggleAddTodoModal(); this.sendPushNotification()}}>
                             <AntDesign name="plus" size={16} color={colors.blue} />
                         </TouchableOpacity>
 
-                        {/*<Text style={styles.add}>Add List</Text>*/}
                     </View>: <View><Text></Text></View>
                     }
+                */}
                     <View style={{height: 190}}>
                         <FlatList 
                             data={this.state.lists} 
