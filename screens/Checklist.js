@@ -6,7 +6,7 @@ import { Table, TableWrapper, Cell, Row, Rows, Col } from 'react-native-table-co
 import colors from '../Colors'
 import { Ionicons } from '@expo/vector-icons'
 import {Icon, Fab } from 'native-base';
-
+console.disableYellowBox = true;
 export default class Checklist extends React.Component {
   constructor(props) {
     super(props);
@@ -25,7 +25,8 @@ export default class Checklist extends React.Component {
         numOfCols: [],
         loading: true,
         modalVisible: false,
-        colHeightArr: []
+        colHeightArr: [],
+        newCenterCheckmarks: {}
       }
 
     }
@@ -51,19 +52,22 @@ export default class Checklist extends React.Component {
     }
 
   componentDidMount() {
-    this.listener = firebase.firestore().collection('checklist').onSnapshot(snap => {
+    this.listener = firebase.firestore().collection('checklist').orderBy('created').onSnapshot(snap => {
       const myItems = {};
       const tableTitle = [];
       let tableHead;
+      let newCenterCheckmarks;
       let tableData = []
       snap.forEach(item => {
         myItems[item.id] = item.data()
-        tableTitle.push(item.data().name)
-        tableHead = Object.keys(item.data().checkmark)
-        tableData.push(Object.values(item.data().checkmark))
+        tableTitle.push(item.data().name) // gets all items for first column (center names) in table
+        tableHead = Object.keys(item.data().checkmark) // gets all items for first row (header) in table
+        tableData.push(Object.values(item.data().checkmark)) //gets all items in cells (true/false) in table
+        newCenterCheckmarks = item.data().checkmark //creates new object with checkmars for new centar
+        Object.keys(newCenterCheckmarks).forEach(v => newCenterCheckmarks[v] = false) //sets all items in object to false when creating new center
       })
       tableHead.unshift('')
-      this.setState({myItems, tableTitle, tableHead, tableData, loading: false})
+      this.setState({myItems, tableTitle, tableHead, tableData, loading: false, newCenterCheckmarks})
     })
 
     this.getHeight = firebase.firestore().collection('lists').onSnapshot(snap => {
@@ -85,13 +89,52 @@ setModalVisible = (visible) => {
   this.setState({ modalVisible: visible });
 }
 
+confirmationMessage = () => {
+    Alert.alert(
+      "New centar added",
+      "You have successfully added a new centar to the checklist!",
+      [
+        { text: "OK", onPress: () => console.log("OK Pressed") }
+      ],
+      { cancelable: false }
+    );
+  }
+
+resetConfirmation = () => {
+  Alert.alert(
+    "Are you sure?",
+    "This will set the entire checklist to unchecked.",
+    [{
+      text: "Cancel",
+      onPress: () => console.log("Cancel Pressed"),
+      style: "cancel"
+    },
+      { text: "Yes", onPress: () => this.resetChecklist() }
+    ],
+    { cancelable: false }
+  );
+}
+
+resetChecklist = () => {
+  let clearChecklist = this.state.newCenterCheckmarks
+  firebase.firestore().collection("checklist").get().then(function(querySnapshot) {
+    querySnapshot.forEach(function(doc) {
+        doc.ref.update({
+          checkmark: clearChecklist,
+        });
+    });
+});
+}
+
 addCenter = () => {
   let updatedHeight = this.state.colHeightArr
   updatedHeight.push(60)
+
   firebase.firestore().collection("checklist").doc(this.state.centerInput).set({
-    checkmark: this.state.tableData[0],
+    checkmark: this.state.newCenterCheckmarks,
     id: this.state.centerInput,
     name: this.state.centerInput,
+    created: firebase.firestore.Timestamp.now()
   })
   .then(function() {
       firebase.firestore().collection("lists").doc("height").update({
@@ -101,7 +144,11 @@ addCenter = () => {
   .catch(function(error) {
       console.error("Error writing document: ", error);
   });
+  this.setState({centerInput:''})
+  this.confirmationMessage()
 }
+
+
 
   render () {
     if (this.state.loading) {
@@ -136,6 +183,14 @@ addCenter = () => {
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
+            <TouchableHighlight
+                style={{ ...styles.openButton, backgroundColor: "#3f51b5", justifyContent: 'flex-start', alignItems: 'flex-end', alignSelf: 'flex-start', borderRadius: 10}}
+                onPress={() => {
+                  this.setModalVisible(!modalVisible);
+                }}
+              >
+                <Text style={styles.textStyle}>Close</Text>
+              </TouchableHighlight>
             <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
               <TextInput
                 style={{flex: 6,height: 50,}}
@@ -154,15 +209,17 @@ addCenter = () => {
               />
               <Button style={{flex: 2, height: 50, padding: 2, marginLeft: 3,}} mode="contained" onPress={() => this.addCenter()}><Text>Add center</Text></Button>
             </View>
-
+            <View style={{flexDirection: 'row'}}>
               <TouchableHighlight
-                style={{ ...styles.openButton, backgroundColor: "#3f51b5" }}
+                style={{ ...styles.openButton, backgroundColor: "red", alignSelf: 'flex-start' }}
                 onPress={() => {
-                  this.setModalVisible(!modalVisible);
+                  this.resetConfirmation();
                 }}
               >
-                <Text style={styles.textStyle}>Close</Text>
+                <Text style={styles.textStyle}>Reset checklist</Text>
               </TouchableHighlight>
+            </View>
+
             </View>
           </View>
         </Modal>
@@ -179,15 +236,15 @@ addCenter = () => {
             <View style={styles.container}>
               {/* borderStyle={{borderWidth: 1}} */}
               <Table>
+              
                 <TableWrapper>
                 <Row  data={state.tableHead} widthArr={state.widthArr} style={styles.head} textStyle={styles.text}/>
                 </TableWrapper>
-                <TableWrapper style={{backgroundColor: '#e8eaf6'}}>
-                <Col data={state.tableTitle} style={styles.title} heightArr={this.state.colHeightArr} textStyle={styles.textCol}/>
+                <ScrollView style={{height:490}}>
                 {
                   state.tableData.map((rowData, index) => (
-                    
                     <TableWrapper key={index} style={styles.wrapper}>
+                      <Cell style={styles.cell} data={state.tableTitle[index]} textStyle={styles.columnText} />
                       {/*<Text>{console.log(rowData)}</Text> */}
                       {
                         rowData.map((cellData, cellIndex) => (
@@ -199,12 +256,15 @@ addCenter = () => {
                     </TableWrapper>
                   ))
                  }
-                </TableWrapper>
                 {/*
                 <TableWrapper style={styles.wrapper}>
-                  <Col data={state.tableTitle} style={styles.title} heightArr={[28,28]} textStyle={styles.text}/>
+                  <Col data={state.tableTitle} style={styles.title} heightArr={[60,60,60,60]} textStyle={styles.text}/>
                   <Rows  widthArr={state.rowWidth} data={state.tableData} flexArr={[1, 1, 1, 1, 1]} style={styles.row} textStyle={styles.text}/>
-                </TableWrapper>*/}
+                </TableWrapper>
+                
+                */}
+                              </ScrollView>
+
               </Table>
             </View>
           </ScrollView>
@@ -232,14 +292,15 @@ addCenter = () => {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 6, paddingTop: 30, backgroundColor: '#fff', paddingRight: 0 },
+  container: { flex: 1, padding: 6, paddingTop: 20, backgroundColor: '#fff', paddingRight: 0,paddingBottom: 0 },
   container1: { flex: 1, padding: 3, paddingTop: 3, backgroundColor: '#fff', borderColor: 'black',paddingRight: 0},
   head: {  height: 60,  backgroundColor: '#3f51b5'  },
-  wrapper: { flexDirection: 'row', marginLeft: 200 },
+  wrapper: { flexDirection: 'row', marginLeft: 0,},
   title: { flex: 1, backgroundColor: 'black', width: 200,},
   textCol: {textAlign: 'center', fontWeight: '700', color: '#474747'},
   row: {  height: 20},
   text: { textAlign: 'center', color: 'white', fontWeight: '700'},
+  columnText: {textAlign: 'center', color: 'black', fontWeight: '700'},
   checkmark: { alignSelf: 'center'},
   cell: {height: 60, width: 200},
   divider: {
@@ -257,7 +318,7 @@ const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start",
     marginTop: 10
   },
   modalView: {
@@ -265,7 +326,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 0,
     padding: 10,
-    alignItems: "center",
+    alignItems: "flex-start",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -279,7 +340,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#3f51b5",
     borderRadius: 2,
     padding: 10,
-    elevation: 2
+    elevation: 2,
+    marginLeft: 20
   },
   textStyle: {
     color: "white",
@@ -289,5 +351,5 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: "center"
-  },
+  }
 });
