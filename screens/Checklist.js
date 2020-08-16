@@ -92,7 +92,7 @@ setModalVisible = (visible) => {
 confirmationMessage = () => {
     Alert.alert(
       "New centar added",
-      "You have successfully added a new centar to the checklist!",
+      "You have successfully added a new centar to the checklist.",
       [
         { text: "OK", onPress: () => console.log("OK Pressed") }
       ],
@@ -148,7 +148,28 @@ addCenter = () => {
   this.confirmationMessage()
 }
 
+deleteConfirmation = (index) => {
+  Alert.alert(
+    "Are you sure?",
+    `This will remove ${this.state.tableTitle[index]} from the checklist.`,
+    [{
+      text: "Cancel",
+      onPress: () => console.log("Cancel Pressed"),
+      style: "cancel"
+    },
+      { text: "Yes", onPress: () => this.deleteCenter(index) }
+    ],
+    { cancelable: false }
+  );
+}
 
+deleteCenter(index) {
+  firebase.firestore().collection("checklist").doc(this.state.tableTitle[index]).delete().then(function() {
+    console.log("Document successfully deleted!");
+}).catch(function(error) {
+    console.error("Error removing document: ", error);
+});
+}
 
   render () {
     if (this.state.loading) {
@@ -169,6 +190,15 @@ addCenter = () => {
           <Ionicons style={styles.checkmark} name={this.state.tableData[index][cellIndex] == false ? 'ios-square-outline' : 'md-checkbox'} size={25} color={colors.gray} />
       </TouchableOpacity>
     
+    );
+
+    const colElement = (index) => (
+      <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+        <TouchableOpacity style={{alignSelf: 'flex-start', flex: 1, paddingLeft: 30,}} onPress={() => this.deleteConfirmation(index)}>
+            <Ionicons name={'md-more'} size={30} color={colors.gray} />
+        </TouchableOpacity>
+        <Text style={styles.columnText}>{this.state.tableTitle[index]}</Text>
+      </View>
     );
 
     return (
@@ -244,7 +274,7 @@ addCenter = () => {
                 {
                   state.tableData.map((rowData, index) => (
                     <TableWrapper key={index} style={styles.wrapper}>
-                      <Cell style={styles.cell} data={state.tableTitle[index]} textStyle={styles.columnText} />
+                      <Cell style={styles.cell} data={index >= 0 ? colElement(index) : state.tableTitle[index]} textStyle={styles.columnText} />
                       {/*<Text>{console.log(rowData)}</Text> */}
                       {
                         rowData.map((cellData, cellIndex) => (
@@ -300,7 +330,7 @@ const styles = StyleSheet.create({
   textCol: {textAlign: 'center', fontWeight: '700', color: '#474747'},
   row: {  height: 20},
   text: { textAlign: 'center', color: 'white', fontWeight: '700'},
-  columnText: {textAlign: 'center', color: 'black', fontWeight: '700'},
+  columnText: {textAlign: 'center', color: 'black', fontWeight: '700', alignSelf: 'center', flex: 1},
   checkmark: { alignSelf: 'center'},
   cell: {height: 60, width: 200},
   divider: {
