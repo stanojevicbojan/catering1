@@ -171,6 +171,20 @@ deleteCenter(index) {
 });
 }
 
+addFood() {
+  let newFood = ''
+  let checkmark = 'checkmark'
+  newFood = this.state.itemInput
+  newFood = checkmark.concat('.', newFood)
+  firebase.firestore().collection("checklist").get().then(function(querySnapshot) {
+      querySnapshot.forEach(function(doc) {
+          doc.ref.update({
+            [`${newFood}`]: false
+          });
+      });
+  });
+}
+
   render () {
     if (this.state.loading) {
       return (
@@ -224,11 +238,11 @@ deleteCenter(index) {
             <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
               <TextInput
                 style={{flex: 6,height: 50,}}
-                label="New item"
+                label="New food"
                 value={itemInput}
                 onChangeText={itemInput => this.setState({itemInput})}
               />
-              <Button style={{flex: 2, height: 50, padding: 2, marginLeft: 3,}} mode="contained" onPress={() => console.log('Pressed')}><Text>Add item</Text></Button>
+              <Button style={{flex: 2, height: 50, padding: 2, marginLeft: 3,}} mode="contained" onPress={() => this.addFood()}><Text>Add food</Text></Button>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
               <TextInput
@@ -268,7 +282,8 @@ deleteCenter(index) {
               <Table>
               
                 <TableWrapper>
-                <Row  data={state.tableHead} widthArr={state.widthArr} style={styles.head} textStyle={styles.text}/>
+                  {/* ako nesto ne bude radilo vrati ovo i uvezi sa firebase! widthArr={state.widthArr}  */}
+                <Row  data={state.tableHead} style={styles.head} textStyle={styles.text}/>
                 </TableWrapper>
                 <ScrollView style={{height:490}}>
                 {
@@ -324,12 +339,12 @@ deleteCenter(index) {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 6, paddingTop: 20, backgroundColor: '#fff', paddingRight: 0,paddingBottom: 0 },
   container1: { flex: 1, padding: 3, paddingTop: 3, backgroundColor: '#fff', borderColor: 'black',paddingRight: 0},
-  head: {  height: 60,  backgroundColor: '#3f51b5'  },
+  head: {  height: 60, backgroundColor: '#3f51b5'},
   wrapper: { flexDirection: 'row', marginLeft: 0,},
   title: { flex: 1, backgroundColor: 'black', width: 200,},
   textCol: {textAlign: 'center', fontWeight: '700', color: '#474747'},
   row: {  height: 20},
-  text: { textAlign: 'center', color: 'white', fontWeight: '700'},
+  text: { textAlign: 'center', color: 'white', fontWeight: '700', marginLeft: 30},
   columnText: {textAlign: 'center', color: 'black', fontWeight: '700', alignSelf: 'center', flex: 1},
   checkmark: { alignSelf: 'center'},
   cell: {height: 60, width: 200},
