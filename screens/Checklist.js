@@ -18,7 +18,8 @@ export default class Checklist extends React.Component {
         centerInput: '',
         myItems: {},
         tableHead: [],
-        widthArr: [200, 200, 200, 200], // Width of each column
+        newTableHead: [],
+        widthArr: [], // Width of each column
         //rowWidth: [200, 100, 100, 100, 100, 100],
         tableTitle: [],
         tableData: [],
@@ -56,6 +57,7 @@ export default class Checklist extends React.Component {
       const myItems = {};
       const tableTitle = [];
       let tableHead;
+      let newTableHead = []
       let newCenterCheckmarks;
       let tableData = []
       snap.forEach(item => {
@@ -66,23 +68,30 @@ export default class Checklist extends React.Component {
         newCenterCheckmarks = item.data().checkmark //creates new object with checkmars for new centar
         Object.keys(newCenterCheckmarks).forEach(v => newCenterCheckmarks[v] = false) //sets all items in object to false when creating new center
       })
-      tableHead.unshift('')
-      this.setState({myItems, tableTitle, tableHead, tableData, loading: false, newCenterCheckmarks})
+      tableHead.forEach(item => {
+        newTableHead.push(this.foodButton(item))
+      })
+      tableHead.unshift('');
+      newTableHead.unshift('');
+      this.setState({myItems, tableTitle, tableHead,newTableHead, tableData, loading: false, newCenterCheckmarks})
     })
 
-    this.getHeight = firebase.firestore().collection('lists').onSnapshot(snap => {
+    this.getWidthAndHeight = firebase.firestore().collection('lists').onSnapshot(snap => {
       let colHeightArr = []
+      let widthArr = []
       snap.forEach(item => {
         colHeightArr = item.data().colHeight
+        widthArr = item.data().widthArr
       })
-      this.setState({colHeightArr})
+      this.setState({colHeightArr, widthArr})
     })
 
+    
 }  
 
   componentWillUnmount() {
     this.listener();
-    this.getHeight();
+    this.getWidthAndHeight();
 }
 
 setModalVisible = (visible) => {
@@ -91,8 +100,8 @@ setModalVisible = (visible) => {
 
 confirmationMessage = () => {
     Alert.alert(
-      "New centar added",
-      "You have successfully added a new centar to the checklist.",
+      "New data added",
+      "You have successfully added new data to the checklist.",
       [
         { text: "OK", onPress: () => console.log("OK Pressed") }
       ],
@@ -127,19 +136,13 @@ resetChecklist = () => {
 }
 
 addCenter = () => {
-  let updatedHeight = this.state.colHeightArr
-  updatedHeight.push(60)
+
 
   firebase.firestore().collection("checklist").doc(this.state.centerInput).set({
     checkmark: this.state.newCenterCheckmarks,
     id: this.state.centerInput,
     name: this.state.centerInput,
     created: firebase.firestore.Timestamp.now()
-  })
-  .then(function() {
-      firebase.firestore().collection("lists").doc("height").update({
-        colHeight: updatedHeight
-      })
   })
   .catch(function(error) {
       console.error("Error writing document: ", error);
@@ -166,12 +169,15 @@ deleteConfirmation = (index) => {
 deleteCenter(index) {
   firebase.firestore().collection("checklist").doc(this.state.tableTitle[index]).delete().then(function() {
     console.log("Document successfully deleted!");
-}).catch(function(error) {
+})
+  .catch(function(error) {
     console.error("Error removing document: ", error);
 });
 }
 
 addFood() {
+  let updatedWidth = this.state.widthArr
+  updatedWidth.push(200)
   let newFood = ''
   let checkmark = 'checkmark'
   newFood = this.state.itemInput
@@ -182,8 +188,59 @@ addFood() {
             [`${newFood}`]: false
           });
       });
-  });
+  })
+  .then(function() {
+    firebase.firestore().collection("lists").doc("width").update({
+      widthArr: updatedWidth
+    })
+})
+this.setState({itemInput:''})
+this.confirmationMessage()
 }
+
+removeFood(header) {
+  let updatedWidth = this.state.widthArr
+  updatedWidth.pop()
+  let checkmark = 'checkmark'
+  let toRemove = header
+  toRemove = checkmark.concat('.', toRemove)
+  firebase.firestore().collection("checklist").get().then(function(querySnapshot) {
+    querySnapshot.forEach(function(doc) {
+        doc.ref.update({
+          [`${toRemove}`]: firebase.firestore.FieldValue.delete()
+        });
+    });
+  })
+  .then(function() {
+    firebase.firestore().collection("lists").doc("width").update({
+      widthArr: updatedWidth
+    })
+  })
+}
+
+deleteFoodConfirmation = (header) => {
+  Alert.alert(
+    "Are you sure?",
+    `This will remove ${header} from the checklist.`,
+    [{
+      text: "Cancel",
+      onPress: () => console.log("Cancel Pressed"),
+      style: "cancel"
+    },
+      { text: "Yes", onPress: () => this.removeFood(header) }
+    ],
+    { cancelable: false }
+  );
+}
+
+foodButton = (header) => (
+  <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+    <TouchableOpacity style={{marginRight: 5}} onPress={() => this.deleteFoodConfirmation(header)}>
+      <Ionicons name={'md-more'} size={30} color={colors.gray} />
+    </TouchableOpacity>
+      <Text style={styles.text}>{header}</Text>
+  </View>
+);
 
   render () {
     if (this.state.loading) {
@@ -280,10 +337,9 @@ addFood() {
             <View style={styles.container}>
               {/* borderStyle={{borderWidth: 1}} */}
               <Table>
-              
                 <TableWrapper>
                   {/* ako nesto ne bude radilo vrati ovo i uvezi sa firebase! widthArr={state.widthArr}  */}
-                <Row  data={state.tableHead} style={styles.head} textStyle={styles.text}/>
+                <Row  data={state.newTableHead} style={styles.head} textStyle={styles.text} widthArr={state.widthArr}/>
                 </TableWrapper>
                 <ScrollView style={{height:490}}>
                 {
@@ -301,22 +357,11 @@ addFood() {
                     </TableWrapper>
                   ))
                  }
-                {/*
-                <TableWrapper style={styles.wrapper}>
-                  <Col data={state.tableTitle} style={styles.title} heightArr={[60,60,60,60]} textStyle={styles.text}/>
-                  <Rows  widthArr={state.rowWidth} data={state.tableData} flexArr={[1, 1, 1, 1, 1]} style={styles.row} textStyle={styles.text}/>
-                </TableWrapper>
-                
-                */}
-                              </ScrollView>
-
+                </ScrollView>
               </Table>
             </View>
           </ScrollView>
         </View>
-        
-
-
         <View>
           <Fab
             active={this.state.active}
@@ -344,10 +389,10 @@ const styles = StyleSheet.create({
   title: { flex: 1, backgroundColor: 'black', width: 200,},
   textCol: {textAlign: 'center', fontWeight: '700', color: '#474747'},
   row: {  height: 20},
-  text: { textAlign: 'center', color: 'white', fontWeight: '700', marginLeft: 30},
+  text: { textAlign: 'center', color: 'white', fontWeight: '700'}, //, marginLeft: 50
   columnText: {textAlign: 'center', color: 'black', fontWeight: '700', alignSelf: 'center', flex: 1},
   checkmark: { alignSelf: 'center'},
-  cell: {height: 60, width: 200},
+  cell: {height: 60, width: 200, borderBottomWidth: 0.5, borderBottomColor: colors.lightBlue },
   divider: {
       backgroundColor: colors.lightBlue,
       height: 1,
