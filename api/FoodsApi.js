@@ -48,6 +48,20 @@ class FireMenu {
             callback(menu)
         })
     }
+    //step 2
+    getListsForSummerWeekTwo(callback) {
+        let ref = this.refSummerWeekTwo.orderBy('sorting')
+
+        this.unsubscribe = ref.onSnapshot(snapshot => {
+            menu = []
+
+            snapshot.forEach(doc => {
+                menu.push({id: doc.id, ...doc.data() })
+            })
+
+            callback(menu)
+        })
+    }
 
     addList(list) {
         let ref = this.ref
@@ -68,6 +82,13 @@ class FireMenu {
         ref.doc(list.id).set(list)
     }
 
+    //step 3
+    updateMenuForSummerWeekTwo(list) {
+        let ref = this.refSummerWeekTwo
+
+        ref.doc(list.id).set(list)
+    }
+
     get user() {
         return firebase.auth().currentUser.uid
     }
@@ -79,13 +100,13 @@ class FireMenu {
         .doc('1mXHCyEEYnhyIqiqyeqi')
         .collection('menu')
     }
-
-    get tef() {
+// step 1
+    get refSummerWeekTwo() {
         return firebase
         .firestore()
         .collection('users')
         .doc('1mXHCyEEYnhyIqiqyeqi')
-        .collection('menu')
+        .collection('summerWeekTwo')
     }
 
     detach() {

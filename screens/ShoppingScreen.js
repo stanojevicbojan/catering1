@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, StyleSheet, TouchableOpacity, FlatList, Modal, Text, ActivityIndicator,  } from 'react-native'
+import { View, StyleSheet, TouchableOpacity, FlatList, Modal, Text, ActivityIndicator, ScrollView } from 'react-native'
 import { AntDesign } from "@expo/vector-icons"
 import colors from '../Colors'
 import TodoList from '../components/TodoList'
@@ -7,6 +7,7 @@ import AddListModal from '../components/AddListModal'
 import Fire from '../Fire'
 import FireMenu from '../api/FoodsApi'
 import MenuList from '../components/MenuList'
+
 import firebase from '../database/firebaseDb';
 
 export default class ShoppingScreen extends React.Component {
@@ -17,6 +18,7 @@ export default class ShoppingScreen extends React.Component {
         loading: true,
         userID: '',
         menu: [],
+        menuYellowWeek1: [],
     }
 
 
@@ -44,6 +46,14 @@ export default class ShoppingScreen extends React.Component {
         fireMenu = new FireMenu(() => {
             fireMenu.getLists(menu => {
                 this.setState({menu}, () => {
+                    this.setState({loading: false})
+                })
+            })
+        })
+        //step 4
+        fireMenuSummerWeekTwo = new FireMenu(() => {
+            fireMenuSummerWeekTwo.getListsForSummerWeekTwo(menuYellowWeek1 => {
+                this.setState({menuYellowWeek1}, () => {
                     this.setState({loading: false})
                 })
             })
@@ -79,9 +89,10 @@ export default class ShoppingScreen extends React.Component {
     updateList = list => {
         fireTodo.updateList(list)
     }
-
+    //step 5
     updateMenu = list => {
         fireMenu.updateMenu(list)
+        fireMenuSummerWeekTwo.updateMenuForSummerWeekTwo(list)
     }
 
 
@@ -94,8 +105,8 @@ export default class ShoppingScreen extends React.Component {
           )
       }
         return (
+            <ScrollView> 
                 <View style={styles.container}>
-
                     <Modal
                         animationType="slide"
                         visible={this.state.addTodoVisible}
@@ -132,7 +143,7 @@ export default class ShoppingScreen extends React.Component {
                             renderItem={({item}) => this.renderList(item)}
                             keyboardShouldPersistTaps="always"
                         />
-                    </View>  
+                    </View> 
                     <View style={{flexDirection: "row"}}>
                         
                         <View style={styles.divider} />
@@ -153,8 +164,23 @@ export default class ShoppingScreen extends React.Component {
                             renderItem={({item}) => this.renderMenu(item)}
                             keyboardShouldPersistTaps="always"
                         />
-                    </View>   
-                    </View>            
+                    </View>
+                    <View style={{flexDirection: "row", alignSelf: 'flex-start'}}>
+                        <Text style={{marginLeft: 10, marginRight: 10}}>Week 2</Text>
+                    </View> 
+                    <View style={{height: 250,}}>
+                        <FlatList 
+                            data={this.state.menuYellowWeek1} 
+                            keyExtractor={item => item.id.toString()} 
+                            horizontal={true} 
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({item}) => this.renderMenu(item)}
+                            keyboardShouldPersistTaps="always"
+                        />
+                    </View>  
+                    </View>  
+                </ScrollView>
+          
         )
     }
 }

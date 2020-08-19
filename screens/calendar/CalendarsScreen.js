@@ -33,8 +33,6 @@ class CalendarsScreen extends Component {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
       if (status === 'granted') {
         const calendars = await Calendar.getCalendarsAsync();
-        console.log('Here are all your calendars:');
-        console.log({ calendars });
       }
     })();
     this.unsubscribe = this.firestoreRef.onSnapshot(this.getCollection);
@@ -149,7 +147,6 @@ class CalendarsScreen extends Component {
               }}
             >
               <Text>{item.name}</Text>
-              {console.log(item.day.toDate())}
             </View>
           </Card.Content>
         </Card>
@@ -194,7 +191,6 @@ class CalendarsScreen extends Component {
             <Icon name="ios-add" />
           </Fab>
           </View>
-          {console.log(this.state.myItems.HHSziHpW6yHi73o6PvMc)}
       </View>
     );
   }
