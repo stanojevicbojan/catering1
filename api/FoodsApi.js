@@ -63,6 +63,90 @@ class FireMenu {
         })
     }
 
+    getListsForSummerWeekThree(callback) {
+        let ref = this.refSummerWeekThree.orderBy('sorting')
+
+        this.unsubscribe = ref.onSnapshot(snapshot => {
+            menu = []
+
+            snapshot.forEach(doc => {
+                menu.push({id: doc.id, ...doc.data() })
+            })
+
+            callback(menu)
+        })
+    }
+
+    getListsForSummerWeekFour(callback) {
+        let ref = this.refSummerWeekFour.orderBy('sorting')
+
+        this.unsubscribe = ref.onSnapshot(snapshot => {
+            menu = []
+
+            snapshot.forEach(doc => {
+                menu.push({id: doc.id, ...doc.data() })
+            })
+
+            callback(menu)
+        })
+    }
+
+    getListsForWinterWeekOne(callback) {
+        let ref = this.refWinterWeekOne.orderBy('sorting')
+
+        this.unsubscribe = ref.onSnapshot(snapshot => {
+            menu = []
+
+            snapshot.forEach(doc => {
+                menu.push({id: doc.id, ...doc.data() })
+            })
+
+            callback(menu)
+        })
+    }
+
+    getListsForWinterWeekTwo(callback) {
+        let ref = this.refWinterWeekTwo.orderBy('sorting')
+
+        this.unsubscribe = ref.onSnapshot(snapshot => {
+            menu = []
+
+            snapshot.forEach(doc => {
+                menu.push({id: doc.id, ...doc.data() })
+            })
+
+            callback(menu)
+        })
+    }
+
+    getListsForWinterWeekThree(callback) {
+        let ref = this.refWinterWeekThree.orderBy('sorting')
+
+        this.unsubscribe = ref.onSnapshot(snapshot => {
+            menu = []
+
+            snapshot.forEach(doc => {
+                menu.push({id: doc.id, ...doc.data() })
+            })
+
+            callback(menu)
+        })
+    }
+
+    getListsForWinterWeekFour(callback) {
+        let ref = this.refWinterWeekFour.orderBy('sorting')
+
+        this.unsubscribe = ref.onSnapshot(snapshot => {
+            menu = []
+
+            snapshot.forEach(doc => {
+                menu.push({id: doc.id, ...doc.data() })
+            })
+
+            callback(menu)
+        })
+    }
+
     addList(list) {
         let ref = this.ref
 
@@ -89,6 +173,42 @@ class FireMenu {
         ref.doc(list.id).set(list)
     }
 
+    updateMenuForSummerWeekThree(list) {
+        let ref = this.refSummerWeekThree
+
+        ref.doc(list.id).set(list)
+    }
+
+    updateMenuForSummerWeekFour(list) {
+        let ref = this.refSummerWeekThree
+
+        ref.doc(list.id).set(list)
+    }
+
+    updateMenuForWinterWeekOne(list) {
+        let ref = this.refWinterWeekOne
+
+        ref.doc(list.id).set(list)
+    }
+
+    updateMenuForWinterWeekTwo(list) {
+        let ref = this.refWinterWeekTwo
+
+        ref.doc(list.id).set(list)
+    }
+
+    updateMenuForWinterWeekThree(list) {
+        let ref = this.refWinterWeekThree
+
+        ref.doc(list.id).set(list)
+    }
+
+    updateMenuForWinterWeekFour(list) {
+        let ref = this.refWinterWeekFour
+
+        ref.doc(list.id).set(list)
+    }
+
     get user() {
         return firebase.auth().currentUser.uid
     }
@@ -107,6 +227,54 @@ class FireMenu {
         .collection('users')
         .doc('1mXHCyEEYnhyIqiqyeqi')
         .collection('summerWeekTwo')
+    }
+
+    get refSummerWeekThree() {
+        return firebase
+        .firestore()
+        .collection('users')
+        .doc('1mXHCyEEYnhyIqiqyeqi')
+        .collection('summerWeekThree')
+    }
+
+        get refSummerWeekFour() {
+        return firebase
+        .firestore()
+        .collection('users')
+        .doc('1mXHCyEEYnhyIqiqyeqi')
+        .collection('summerWeekFour')
+    }
+
+    get refWinterWeekOne() {
+        return firebase
+        .firestore()
+        .collection('users')
+        .doc('1mXHCyEEYnhyIqiqyeqi')
+        .collection('winterWeekOne')
+    }
+
+    get refWinterWeekTwo() {
+        return firebase
+        .firestore()
+        .collection('users')
+        .doc('1mXHCyEEYnhyIqiqyeqi')
+        .collection('winterWeekTwo')
+    }
+
+    get refWinterWeekThree() {
+        return firebase
+        .firestore()
+        .collection('users')
+        .doc('1mXHCyEEYnhyIqiqyeqi')
+        .collection('winterWeekThree')
+    }
+
+    get refWinterWeekFour() {
+        return firebase
+        .firestore()
+        .collection('users')
+        .doc('1mXHCyEEYnhyIqiqyeqi')
+        .collection('winterWeekFour')
     }
 
     detach() {

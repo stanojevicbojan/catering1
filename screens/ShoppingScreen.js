@@ -18,7 +18,13 @@ export default class ShoppingScreen extends React.Component {
         loading: true,
         userID: '',
         menu: [],
-        menuYellowWeek1: [],
+        menuYellowWeek2: [],
+        menuYellowWeek3: [],
+        menuYellowWeek4: [],
+        menuBlueWeek1: [],
+        menuBlueWeek2: [],
+        menuBlueWeek3: [],
+        menuBlueWeek4: [],
     }
 
 
@@ -52,12 +58,61 @@ export default class ShoppingScreen extends React.Component {
         })
         //step 4
         fireMenuSummerWeekTwo = new FireMenu(() => {
-            fireMenuSummerWeekTwo.getListsForSummerWeekTwo(menuYellowWeek1 => {
-                this.setState({menuYellowWeek1}, () => {
+            fireMenuSummerWeekTwo.getListsForSummerWeekTwo(menuYellowWeek2 => {
+                this.setState({menuYellowWeek2}, () => {
                     this.setState({loading: false})
                 })
             })
         })
+
+        fireMenuSummerWeekThree = new FireMenu(() => {
+            fireMenuSummerWeekThree.getListsForSummerWeekThree(menuYellowWeek3 => {
+                this.setState({menuYellowWeek3}, () => {
+                    this.setState({loading: false})
+                })
+            })
+        })
+
+        fireMenuSummerWeekFour = new FireMenu(() => {
+            fireMenuSummerWeekFour.getListsForSummerWeekFour(menuYellowWeek4 => {
+                this.setState({menuYellowWeek4}, () => {
+                    this.setState({loading: false})
+                })
+            })
+        })
+
+        fireMenuWinterWeekOne = new FireMenu(() => {
+            fireMenuWinterWeekOne.getListsForWinterWeekOne(menuBlueWeek1 => {
+                this.setState({menuBlueWeek1}, () => {
+                    this.setState({loading: false})
+                })
+            })
+        })
+
+        fireMenuWinterWeekTwo = new FireMenu(() => {
+            fireMenuWinterWeekTwo.getListsForWinterWeekTwo(menuBlueWeek2 => {
+                this.setState({menuBlueWeek2}, () => {
+                    this.setState({loading: false})
+                })
+            })
+        })
+
+        fireMenuWinterWeekThree = new FireMenu(() => {
+            fireMenuWinterWeekThree.getListsForWinterWeekThree(menuBlueWeek3 => {
+                this.setState({menuBlueWeek3}, () => {
+                    this.setState({loading: false})
+                })
+            })
+        })
+
+        fireMenuWinterWeekFour = new FireMenu(() => {
+            fireMenuWinterWeekFour.getListsForWinterWeekFour(menuBlueWeek4 => {
+                this.setState({menuBlueWeek4}, () => {
+                    this.setState({loading: false})
+                })
+            })
+        })
+
     }  
 
     componentWillUnmount() {
@@ -78,6 +133,34 @@ export default class ShoppingScreen extends React.Component {
         return <MenuList list={list} updateList={this.updateMenu}/>
     }
 
+    renderMenuTwo = list => {
+        return <MenuList list={list} updateList={this.updateMenuTwo}/>
+    }
+
+    renderMenuThree = list => {
+        return <MenuList list={list} updateList={this.updateMenuThree}/>
+    }
+
+    renderMenuFour = list => {
+        return <MenuList list={list} updateList={this.updateMenuFour}/>
+    }
+
+    renderWinterMenuOne = list => {
+        return <MenuList list={list} updateList={this.updateWinterMenuOne}/>
+    }
+
+    renderWinterMenuTwo = list => {
+        return <MenuList list={list} updateList={this.updateWinterMenuTwo}/>
+    }
+
+    renderWinterMenuThree = list => {
+        return <MenuList list={list} updateList={this.updateWinterMenuThree}/>
+    }
+
+    renderWinterMenuFour = list => {
+        return <MenuList list={list} updateList={this.updateWinterMenuFour}/>
+    }
+
     addList = list => {
         fireTodo.addList({
             name: list.name,
@@ -92,7 +175,34 @@ export default class ShoppingScreen extends React.Component {
     //step 5
     updateMenu = list => {
         fireMenu.updateMenu(list)
+    }
+
+    updateMenuTwo = list => {
         fireMenuSummerWeekTwo.updateMenuForSummerWeekTwo(list)
+    }
+
+    updateMenuThree = list => {
+        fireMenuSummerWeekThree.updateMenuForSummerWeekThree(list)
+    }
+
+    updateMenuFour = list => {
+        fireMenuSummerWeekFour.updateMenuForSummerWeekFour(list)
+    }
+
+    updateWinterMenuOne = list => {
+        fireMenuWinterWeekOne.updateMenuForWinterWeekOne(list)
+    }
+
+    updateWinterMenuTwo = list => {
+        fireMenuWinterWeekTwo.updateMenuForWinterWeekTwo(list)
+    }
+
+    updateWinterMenuThree = list => {
+        fireMenuWinterWeekThree.updateMenuForWinterWeekThree(list)
+    }
+
+    updateWinterMenuFour = list => {
+        fireMenuWinterWeekFour.updateMenuForWinterWeekFour(list)
     }
 
 
@@ -105,7 +215,7 @@ export default class ShoppingScreen extends React.Component {
           )
       }
         return (
-            <ScrollView> 
+            <ScrollView style={{marginTop: 30}}> 
                 <View style={styles.container}>
                     <Modal
                         animationType="slide"
@@ -170,14 +280,100 @@ export default class ShoppingScreen extends React.Component {
                     </View> 
                     <View style={{height: 250,}}>
                         <FlatList 
-                            data={this.state.menuYellowWeek1} 
+                            data={this.state.menuYellowWeek2} 
                             keyExtractor={item => item.id.toString()} 
                             horizontal={true} 
                             showsHorizontalScrollIndicator={false}
-                            renderItem={({item}) => this.renderMenu(item)}
+                            renderItem={({item}) => this.renderMenuTwo(item)}
                             keyboardShouldPersistTaps="always"
                         />
+                    </View>
+                    <View style={{flexDirection: "row", alignSelf: 'flex-start'}}>
+                        <Text style={{marginLeft: 10, marginRight: 10}}>Week 3</Text>
+                    </View> 
+                    <View style={{height: 250,}}>
+                        <FlatList 
+                            data={this.state.menuYellowWeek3} 
+                            keyExtractor={item => item.id.toString()} 
+                            horizontal={true} 
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({item}) => this.renderMenuThree(item)}
+                            keyboardShouldPersistTaps="always"
+                        />
+                    </View>
+                    <View style={{flexDirection: "row", alignSelf: 'flex-start'}}>
+                        <Text style={{marginLeft: 10, marginRight: 10}}>Week 4</Text>
+                    </View> 
+                    <View style={{height: 250,}}>
+                        <FlatList 
+                            data={this.state.menuYellowWeek4} 
+                            keyExtractor={item => item.id.toString()} 
+                            horizontal={true} 
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({item}) => this.renderMenuFour(item)}
+                            keyboardShouldPersistTaps="always"
+                        />
+                    </View> 
+                    <View style={{flexDirection: "row"}}>
+                        
+                        <View style={styles.divider} />
+                        <Text style={styles.menuTitle}>
+                            Winter <Text style={{fontWeight: "100", color: colors.blue}}>Menu</Text>
+                        </Text>
+                        <View style={styles.divider} />
                     </View>  
+                    <View style={{flexDirection: "row", alignSelf: 'flex-start'}}>
+                        <Text style={{marginLeft: 10, marginRight: 10}}>Week 1</Text>
+                    </View> 
+                    <View style={{height: 250,}}>
+                        <FlatList 
+                            data={this.state.menuBlueWeek1} 
+                            keyExtractor={item => item.id.toString()} 
+                            horizontal={true} 
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({item}) => this.renderWinterMenuOne(item)}
+                            keyboardShouldPersistTaps="always"
+                        />
+                    </View> 
+                    <View style={{flexDirection: "row", alignSelf: 'flex-start'}}>
+                        <Text style={{marginLeft: 10, marginRight: 10}}>Week 2</Text>
+                    </View> 
+                    <View style={{height: 250,}}>
+                        <FlatList 
+                            data={this.state.menuBlueWeek2} 
+                            keyExtractor={item => item.id.toString()} 
+                            horizontal={true} 
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({item}) => this.renderWinterMenuTwo(item)}
+                            keyboardShouldPersistTaps="always"
+                        />
+                    </View> 
+                    <View style={{flexDirection: "row", alignSelf: 'flex-start'}}>
+                        <Text style={{marginLeft: 10, marginRight: 10}}>Week 3</Text>
+                    </View> 
+                    <View style={{height: 250,}}>
+                        <FlatList 
+                            data={this.state.menuBlueWeek3} 
+                            keyExtractor={item => item.id.toString()} 
+                            horizontal={true} 
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({item}) => this.renderWinterMenuThree(item)}
+                            keyboardShouldPersistTaps="always"
+                        />
+                    </View>
+                    <View style={{flexDirection: "row", alignSelf: 'flex-start'}}>
+                        <Text style={{marginLeft: 10, marginRight: 10}}>Week 4</Text>
+                    </View> 
+                    <View style={{height: 250,}}>
+                        <FlatList 
+                            data={this.state.menuBlueWeek4} 
+                            keyExtractor={item => item.id.toString()} 
+                            horizontal={true} 
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({item}) => this.renderWinterMenuFour(item)}
+                            keyboardShouldPersistTaps="always"
+                        />
+                    </View>
                     </View>  
                 </ScrollView>
           
