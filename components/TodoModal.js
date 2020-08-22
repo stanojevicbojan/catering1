@@ -78,6 +78,18 @@ export default class TodoModal extends React.Component {
         
     }
 
+    resetPurchaseRequestList() {
+        //get all available tokens
+        const docRef = firebase.firestore().collection('users').doc('1mXHCyEEYnhyIqiqyeqi').collection('lists').doc('NVHD5c3FmQY8AMuHqFwr')
+
+        // Reset todos in the Shopping list
+        docRef.update({todos: firebase.firestore.FieldValue.delete()
+        });
+        docRef.update({todos: []
+        });
+        
+    }
+
     renderTodo = (todo, index) => {
         return (
                 <View style={styles.todoContainer}>
@@ -219,7 +231,7 @@ export default class TodoModal extends React.Component {
                         <Button style={styles.sendRequestButton} icon="delete" mode="contained" onPress={() => this.createTwoButtonAlert()}>Reset list</Button>
                         </View>
                         :
-                        <Button style={styles.sendRequestButton} icon="send" mode="contained" onPress={() => {this.addAllToShoppingList() ; this.sendPushNotification()}}>Send request</Button>
+                        <Button style={styles.sendRequestButton} icon="send" mode="contained" onPress={() => {this.addAllToShoppingList(); this.resetPurchaseRequestList(); this.sendPushNotification()}}>Send request</Button>
                         }
                         
                         <Text style={styles.title}>{list.name}</Text>

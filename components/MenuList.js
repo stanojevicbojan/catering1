@@ -20,9 +20,12 @@ export default class MenuList extends React.Component {
     
         const completedCount = list.todos.map((todo,index) => 
             {
+                if (index < 4) {
                 return (
+                    
                         <Text key={index}>{'\u25cf'} {todo.title}{"\n"}</Text>
                 )
+            }
             }
             )
 
@@ -48,11 +51,15 @@ export default class MenuList extends React.Component {
 
                     <Text style={styles.listTitle} numberOfLines={1}>
                         {list.name}
+                        
                     </Text>
-                    <View>
-                        <View style={{alignItems: 'center'}}>
+                    <View style={{flex: 1}}>
+                        <View style={{alignItems: 'center', height: 150}}>
                             <Text style={styles.count}>{completedCount}</Text>
                            {/* <Text style={styles.subtitle}>Completed</Text> */}
+                        </View>
+                        <View style={{alignItems: 'center', justifyContent: 'flex-end', height: 20}}>
+                            <Text style={styles.threeDots}>{'\u25cf \u25cf \u25cf'}</Text>
                         </View>
                     </View>
                 </TouchableOpacity>
@@ -82,6 +89,13 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "400",
         color: colors.white
+    },
+    threeDots: {
+        fontSize: 20,
+        fontWeight: "400",
+        color: colors.white,
+        justifyContent: 'flex-end',
+        alignItems: 'flex-end'
     }
 })
 
