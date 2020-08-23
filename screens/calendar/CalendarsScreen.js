@@ -25,6 +25,7 @@ class CalendarsScreen extends Component {
       active: false,
       items: {},
       myItems: {},
+      selectedDay: ''
     };
   }
 
@@ -107,7 +108,25 @@ class CalendarsScreen extends Component {
   return eventId
   }
 
-  createThreeButtonAlert = (item) =>
+  createThreeButtonAlert = (item) => {
+    let getDate = item.day.toDate().toISOString()
+    let selectedDate = getDate.split("T")[0]
+    let checkIfArrayEmpty = firebase.firestore().collection('calendar').doc('HHSziHpW6yHi73o6PvMc')
+    emptyArrayChecker = () => {
+      checkIfArrayEmpty.get().then(function(doc) {
+        if (doc.exists && doc.data()[selectedDate].length < 1 ) {
+          firebase.firestore().collection('calendar').doc('HHSziHpW6yHi73o6PvMc').update({
+            [`${selectedDate}`]:firebase.firestore.FieldValue.delete()
+          })
+        } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+        }
+        }).catch(function(error) {
+            console.log("Error getting document:", error);
+        });
+      }
+    
     Alert.alert(
       `${item.name}`,
       `Starts: ${item.day.toDate().toString().substr(0,21)}\nEnds:${item.dateEnd.toDate().toString().substr(0,21)}, \nLocation: ${item.location}`,
@@ -118,15 +137,17 @@ class CalendarsScreen extends Component {
         },
         {
           text: "Delete",
-          onPress: () => this.eventRemove.update({
-            "2020-07-23": firebase.firestore.FieldValue.arrayRemove({dateEnd: item.dateEnd, day: item.day, location: item.location, name: item.name}),
-          }),
+          onPress: () => {this.eventRemove.update({
+            [`${selectedDate}`]: firebase.firestore.FieldValue.arrayRemove({dateEnd: item.dateEnd, day: item.day, location: item.location, name: item.name}),
+          });emptyArrayChecker()},
           style: "cancel"
         },
-        { text: "Close", onPress: () => console.log("OK Pressed") }
+        { text: "Close", onPress: () => console.log()}
       ],
       { cancelable: false }
     );
+
+  }
 
   renderItem(item) {
     
@@ -177,9 +198,9 @@ class CalendarsScreen extends Component {
           loadItemsForMonth={this.loadItems.bind(this)}
           selected={Date()}
           renderItem={this.renderItem.bind(this)}
-          onDayPress={(day) => {console.log('selected day', day)}}
+          onDayPress={(day) => {this.setState({selectedDay: day.dateString})}} //console.log('selected day', day)
           renderEmptyData={() => {return (<View><Text style={{alignSelf: 'center', marginTop: 15}}>No events for this day.</Text></View>);}}
-          firstDay={1}
+          //firstDay={1}
           />
           <Fab
             active={this.state.active}
