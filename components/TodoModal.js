@@ -4,24 +4,50 @@ import { AntDesign, Ionicons, Fontisto } from '@expo/vector-icons'
 import colors from '../Colors'
 import firebase from '../database/firebaseDb';
 import { SwipeListView } from 'react-native-swipe-list-view';
-import { Button, Paragraph, Dialog, Portal, Provider } from 'react-native-paper';
+import { Button, Paragraph, Dialog, Portal, Provider, Chip } from 'react-native-paper';
 import { Notifications } from 'expo';
 import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 export default class TodoModal extends React.Component {
-    state = {
-        newTodo: "",
-        expoPushToken: '',
-        usersTokens: []
-    }
+    constructor(props) {
+        super(props);
 
+        let test = []
+        this.state = {
+            newTodo: "",
+            expoPushToken: '',
+            usersTokens: [],
+            favorites: []
+        }
+    }
     componentDidMount() {
         // run function to send push notifications on mount
         this.registerForPushNotificationsAsync()
-
         this.getAllTokens()
+        this.favoritesList = firebase.firestore().collection('lists').onSnapshot(snap => {
+            let myItems = {}
+            let favorites = {}
+            let onlyTrue = []
+            snap.forEach(item => {
+              myItems[item.id] = item.data().favorites
+              favorites = myItems.favorites
+              const result = Object.keys(favorites)
+                .reduce((o, key) => {
+                    favorites[key] == true && (o[key] = favorites[key]);
+
+                    return o;
+                }, {});
+              onlyTrue = Object.keys(result)
+            })
+            this.setState({favorites: onlyTrue})
+          })
+    }
+
+    componentWillUnmount() {
+        this.favoritesList();
     }
 
     toggleTodoCompleted = index => {
@@ -52,6 +78,16 @@ export default class TodoModal extends React.Component {
 
         this.props.updateList(list)
         this.setState({newTodo: "" })
+
+        //if dismissing keyboard is needed
+        //Keyboard.dismiss()
+    }
+
+    addFromFavorites = (item) => {
+        let list = this.props.list
+        list.todos.push({title: item, completed: false, counter:1})
+
+        this.props.updateList(list)
 
         //if dismissing keyboard is needed
         //Keyboard.dismiss()
@@ -138,7 +174,6 @@ export default class TodoModal extends React.Component {
             return;
           }
           const token = await Notifications.getExpoPushTokenAsync();
-          console.log(token);
           this.setState({ expoPushToken: token });
         }
 
@@ -206,6 +241,10 @@ export default class TodoModal extends React.Component {
         }
         alert("Items added to shopping list!")
     }
+
+    singleFavorite = () => (
+        <Chip icon="information" onPress={() => console.log('Pressed')}>Example Chip</Chip>
+      );
 
   render() {
       const list = this.props.list
@@ -285,19 +324,37 @@ export default class TodoModal extends React.Component {
                             showsVerticalScrollIndicator={false}
                         />
                 </View>
+                {
+                    list.name !== 'Shopping list' ?
+                    <View style={styles.favorites}>
+                        <SwipeListView
+                            data={this.state.favorites}
+                            renderItem={({ item, index }) => 
+                                <View>
+                                    <Chip style={{margin: 3}} icon="star" onPress={() => this.addFromFavorites(item)} onClose={() => console.log('remove from favorites')}>{item}</Chip>
+                                </View>
+                            }
+                            keyExtractor={(_, index) => index.toString()}
+                            horizontal={true}
+                            showsHorizontalScrollIndicator={false}
+                        />
+                    </View>
+                    :
+                    null
+                }
                 { list.name !== 'Shopping list' ? 
                     <View style={[styles.section, styles.footer]}>
-                    <TextInput 
-                        style={[styles.input, {borderColor: list.color}]}
-                        onChangeText={text => this.setState({newTodo: text})}
-                        value={this.state.newTodo}
-                    />
-                    <TouchableOpacity
-                        style={[styles.addTodo, {backgroundColor: list.color}]}
-                        onPress={() => this.addTodo()}
-                    >
-                        <AntDesign name="plus" size={16} color={colors.white} />
-                    </TouchableOpacity>
+                        <TextInput 
+                            style={[styles.input, {borderColor: list.color}]}
+                            onChangeText={text => this.setState({newTodo: text})}
+                            value={this.state.newTodo}
+                        />
+                        <TouchableOpacity
+                            style={[styles.addTodo, {backgroundColor: list.color}]}
+                            onPress={() => this.addTodo()}
+                        >
+                            <AntDesign name="plus" size={16} color={colors.white} />
+                        </TouchableOpacity>
                     </View>
                     :
                     null
@@ -434,5 +491,14 @@ const styles = StyleSheet.create({
     },
     resetButton: {
         marginTop: 50,
+    },
+    favorites: {
+        flex: 1,
+        alignSelf: 'stretch',
+        paddingHorizontal: 0,
+        paddingLeft: 32,
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: -20,
     }
 })
