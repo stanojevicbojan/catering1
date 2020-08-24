@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         alignItems: 'center',
         //justifyContent: 'center',
-        marginTop: 30,
+        marginTop: 20,
     },
     divider: {
         backgroundColor: colors.lightBlue,
@@ -400,6 +400,7 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         color: colors.black,
         paddingHorizontal: 64,
+        marginBottom: 15,
     },
     menuTitle: {
         fontSize: 18,

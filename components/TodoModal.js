@@ -241,10 +241,26 @@ export default class TodoModal extends React.Component {
         }
         alert("Items added to shopping list!")
     }
+    
+    addToFavorites = (item) => {
+        let foodName = "favorites.".concat(item.title)
+        firebase.firestore().collection('lists').doc('favorites').update({[`${foodName}`]: true}).then(function() {
+            Alert.alert(
+                "Success!",
+                `You have successfully added ${item.title} to the favorites.`,
+                [
+                  { text: "OK", onPress: () => console.log('OK Pressed') }
+                ],
+                { cancelable: false }
+              );
+        }); 
+    }
 
-    singleFavorite = () => (
-        <Chip icon="information" onPress={() => console.log('Pressed')}>Example Chip</Chip>
-      );
+    removeFromFavorites = (item) => {
+        let foodName = "favorites.".concat(item)
+        firebase.firestore().collection('lists').doc('favorites').update({[`${foodName}`]: false})
+        console.log(item)
+    }
 
   render() {
       const list = this.props.list
@@ -295,6 +311,9 @@ export default class TodoModal extends React.Component {
                                     <Ionicons name={'ios-add-circle'} size={38} color={"#E1E2E1"} />
                                     </TouchableOpacity>
                                     <Text style={[styles.todo]}>{item.title}</Text>
+                                    <TouchableOpacity style={{justifyContent: 'center', marginLeft: 5}}  onPress={() => this.addToFavorites(item)}>
+                                    <Ionicons name={'ios-star-outline'} size={28} color={"#E1E2E1"} />
+                                    </TouchableOpacity>
                                 </View>
                                 {list.name == 'Shopping list' ?
                                 <View style={styles.checkmark}>
@@ -331,7 +350,7 @@ export default class TodoModal extends React.Component {
                             data={this.state.favorites}
                             renderItem={({ item, index }) => 
                                 <View>
-                                    <Chip style={{margin: 3}} icon="star" onPress={() => this.addFromFavorites(item)} onClose={() => console.log('remove from favorites')}>{item}</Chip>
+                                    <Chip style={{margin: 3}} icon="star" onPress={() => this.addFromFavorites(item)} onClose={() => this.removeFromFavorites(item)}>{item}</Chip>
                                 </View>
                             }
                             keyExtractor={(_, index) => index.toString()}

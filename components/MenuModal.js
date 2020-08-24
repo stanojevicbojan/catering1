@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity,  KeyboardAvoidingView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity,  KeyboardAvoidingView, TextInput, Alert } from 'react-native';
 import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import colors from '../Colors'
 import { SwipeListView } from 'react-native-swipe-list-view';
@@ -86,7 +86,19 @@ export default class MenuModal extends React.Component {
         )
     }
 
-
+    addToFavorites = (item) => {
+        let foodName = "favorites.".concat(item.title)
+        firebase.firestore().collection('lists').doc('favorites').update({[`${foodName}`]: true}).then(function() {
+            Alert.alert(
+                "Success!",
+                `Successfully added ${item.title} to the favorites.`,
+                [
+                  { text: "OK", onPress: () => console.log('OK Pressed') }
+                ],
+                { cancelable: false }
+              );
+        }); 
+    }
 
 
   render() {
@@ -125,10 +137,10 @@ export default class MenuModal extends React.Component {
                             <TouchableOpacity  onPress={() => this.increaseAmount(index)}>
                             <Ionicons name={'ios-add-circle'} size={38} color={"#E1E2E1"} />
                             </TouchableOpacity>
-                            
-                            <Text style={[styles.todo]}>{item.title
-                                }
-                            </Text>
+                            <Text style={[styles.todo]}>{item.title}</Text>
+                            <TouchableOpacity style={{justifyContent: 'center', marginLeft: 5}}  onPress={() => this.addToFavorites(item)}>
+                                <Ionicons name={'ios-star-outline'} size={28} color={"#E1E2E1"} />
+                            </TouchableOpacity>
                         </View>
                         }
                         //this.renderTodo(item, index)}
