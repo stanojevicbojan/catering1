@@ -145,18 +145,26 @@ timepickerEnd = () => {
                 <View
                   style={styles.datepicker}
                 >
-                  <Text style={{color: '#808080'}}>Event starts: </Text>
-                  <Text>{date !== undefined ? date.toString().substr(0,21) : date }</Text>
-                  <AntDesign style={{marginLeft:20}} name="calendar" size={34} color={'#000000'} onPress={this.datepicker}/>
-                  <Ionicons style={{marginLeft:20}} name="md-timer" size={34} color={'#000000'} onPress={this.timepicker}/>
+                  <View style={{flex: 1, flexDirection: 'row'}}>
+                    <Text style={{color: '#808080'}}>Start: </Text>
+                    <Text>{date !== undefined ? date.toString().substr(0,21) : date }</Text>
+                  </View>
+                  <View style={{flexDirection: 'row'}}>
+                    <AntDesign style={{marginLeft:20}} name="calendar" size={34} color={'#000000'} onPress={this.datepicker}/>
+                    <Ionicons style={{marginLeft:20}} name="md-timer" size={34} color={'#000000'} onPress={this.timepicker}/>
+                  </View>
                 </View>
                 <View
                   style={styles.datepicker}
                 >
-                  <Text style={{color: '#808080'}}>Event ends: </Text>
-                  <Text>{dateEnd !== undefined ? dateEnd.toString().substr(0,21) : dateEnd }</Text>
-                  <AntDesign style={{marginLeft:20}} name="calendar" size={34} color={'#000000'} onPress={this.datepickerEnd}/>
-                  <Ionicons style={{marginLeft:20}} name="md-timer" size={34} color={'#000000'} onPress={this.timepickerEnd}/>
+                  <View style={{flex: 1, flexDirection: 'row'}}>
+                    <Text style={{color: '#808080'}}>End: </Text>
+                    <Text>{dateEnd !== undefined ? dateEnd.toString().substr(0,21) : dateEnd }</Text>
+                  </View>
+                  <View style={{flexDirection: 'row'}}>
+                    <AntDesign style={{marginLeft:20}} name="calendar" size={34} color={'#000000'} onPress={this.datepickerEnd}/>
+                    <Ionicons style={{marginLeft:20}} name="md-timer" size={34} color={'#000000'} onPress={this.timepickerEnd}/>
+                  </View>
                 </View>
               {
                   show && <DateTimePicker
@@ -218,6 +226,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   datepicker: {
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',

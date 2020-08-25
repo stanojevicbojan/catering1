@@ -217,7 +217,7 @@ export default class TodoModal extends React.Component {
                 to: this.state.usersTokens[i],
                 sound: 'default',
                 title: 'Shopping cart updated',
-                body: 'New items added to shopping cart!',
+                body: 'New items added to the shopping cart!',
                 data: { data: 'goes here' },
                 };
                 
@@ -269,7 +269,7 @@ export default class TodoModal extends React.Component {
       const completedCount = list.todos == undefined ? 0 : list.todos.filter(todo => todo.completed).length
 
     return (
-        <KeyboardAvoidingView style={{flex: 1, marginTop: 30,}} behavior="height">
+        <KeyboardAvoidingView style={{flex: 1, marginTop: 10}} behavior="height">
             <SafeAreaView style={styles.container}>
                 <TouchableOpacity 
                     style={{position: "absolute", top: 30, right: 32, zIndex: 10}}
@@ -278,8 +278,8 @@ export default class TodoModal extends React.Component {
                     <AntDesign name="close" size={24} color={colors.black} />
                 </TouchableOpacity>
 
-                <View style={[styles.section, styles.header, {borderBottomColor: list.color}]}>
-                    <View>
+                <View style={[styles.section, styles.header, {borderBottomColor: list.color}, {zIndex: 6, marginBottom: 30}]}>
+                    <View style={{backgroundColor: 'white'}}>
                         
                         {list.name == 'Shopping list' ?
                         <View> 
@@ -297,7 +297,7 @@ export default class TodoModal extends React.Component {
                         }
                     </View>
                 </View>
-                <View style={[styles.section, {flex: 5}]}>
+                <View style={[styles.section, {flex: 20, zIndex: 5}]}>
                     <SwipeListView
                             data={list.todos}
                             renderItem={({ item, index }) => 
@@ -360,7 +360,7 @@ export default class TodoModal extends React.Component {
                     </View>
                     :
                     null
-                }
+                }  
                 { list.name !== 'Shopping list' ? 
                     <View style={[styles.section, styles.footer]}>
                         <TextInput 
@@ -368,17 +368,18 @@ export default class TodoModal extends React.Component {
                             onChangeText={text => this.setState({newTodo: text})}
                             value={this.state.newTodo}
                         />
+
                         <TouchableOpacity
                             style={[styles.addTodo, {backgroundColor: list.color}]}
                             onPress={() => this.addTodo()}
                         >
                             <AntDesign name="plus" size={16} color={colors.white} />
                         </TouchableOpacity>
+
                     </View>
                     :
                     null
                 }
-                
             </SafeAreaView>
         </KeyboardAvoidingView>
     );
@@ -390,11 +391,10 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: 'center',
-        marginTop: 10,
     },
     section: {
         flex: 1,
-        alignSelf: 'stretch'
+        alignSelf: 'stretch',
     },
     header: {
         marginLeft: 14,
@@ -403,18 +403,20 @@ const styles = StyleSheet.create({
         fontSize: 30,
         fontWeight: "700",
         color: colors.black,
-        marginBottom: 5
+        marginBottom: 5,
     },
     taskCount: {
-        marginTop: 4,
+        marginTop: 10,
         marginBottom: 16,
         color: colors.gray,
-        fontWeight: "700"
+        backgroundColor: 'white',
+        fontWeight: "700",
     },
     footer: {
         paddingHorizontal: 32,
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
+        marginBottom: 45,
     },
     input: {
         flex: 1,
@@ -463,6 +465,8 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         height: 50,
         marginBottom: 5,
+        zIndex: 99,
+        
     },
     listItems: {
         flexDirection: 'row',
@@ -512,12 +516,11 @@ const styles = StyleSheet.create({
         marginTop: 50,
     },
     favorites: {
-        flex: 1,
         alignSelf: 'stretch',
         paddingHorizontal: 0,
         paddingLeft: 32,
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: -20,
+        marginBottom: 17,
     }
 })
