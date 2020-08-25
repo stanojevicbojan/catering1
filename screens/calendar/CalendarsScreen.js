@@ -1,14 +1,11 @@
 import React, { Component } from 'react';
 import { Alert, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, InteractionManager } from 'react-native';
-import { Agenda } from 'react-native-calendars'
+import { Agenda,CalendarList } from 'react-native-calendars'
 import { Card } from 'react-native-paper';
-import { ListItem } from 'react-native-elements'
 import firebase from '../../database/firebaseDb';
-import { View, Button, Icon, Fab } from 'native-base';
-import { Linking } from 'expo';
+import { View, Icon, Fab } from 'native-base';
 import colors from '../../Colors'
 import * as Calendar from 'expo-calendar';
-import RNCalendarEvents from 'react-native-calendar-events';
 
 
 class CalendarsScreen extends Component {
@@ -112,7 +109,7 @@ class CalendarsScreen extends Component {
     let getDate = item.day.toDate().toISOString()
     let selectedDate = getDate.split("T")[0]
     let checkIfArrayEmpty = firebase.firestore().collection('calendar').doc('HHSziHpW6yHi73o6PvMc')
-    emptyArrayChecker = () => {
+    let emptyArrayChecker = function() {
       checkIfArrayEmpty.get().then(function(doc) {
         if (doc.exists && doc.data()[selectedDate].length < 1 ) {
           firebase.firestore().collection('calendar').doc('HHSziHpW6yHi73o6PvMc').update({
@@ -129,18 +126,18 @@ class CalendarsScreen extends Component {
     
     Alert.alert(
       `${item.name}`,
-      `Starts: ${item.day.toDate().toString().substr(0,21)}\nEnds:${item.dateEnd.toDate().toString().substr(0,21)}, \nLocation: ${item.location}`,
+      `Starts: ${item.day.toDate().toString().substr(0,21)}\nEnds:${item.dateEnd.toDate().toString().substr(0,21)} \nLocation: ${item.location}`,
       [
-        {
-          text: "Add to Google",
-          onPress: () => this.createEvent(item)
-        },
         {
           text: "Delete",
           onPress: () => {this.eventRemove.update({
             [`${selectedDate}`]: firebase.firestore.FieldValue.arrayRemove({dateEnd: item.dateEnd, day: item.day, location: item.location, name: item.name}),
           });emptyArrayChecker()},
           style: "cancel"
+        },
+        {
+          text: "Add to Google",
+          onPress: () => this.createEvent(item)
         },
         { text: "Close", onPress: () => console.log()}
       ],
@@ -160,14 +157,15 @@ class CalendarsScreen extends Component {
           <Card.Content>
             <View
               style={{
-                flexDirection: 'row',
+                //flexDirection: 'row',
                 justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingTop: 20,
-                
+                alignItems: 'flex-start',
+                paddingTop: 10,
+                paddingBottom: 10,
               }}
             >
               <Text>{item.name}</Text>
+              <Text style={{fontWeight: '100', fontStyle: 'italic', color: colors.gray}}>{item.location}</Text>
             </View>
           </Card.Content>
         </Card>
@@ -185,22 +183,23 @@ class CalendarsScreen extends Component {
     }    
     return (
     <View style={styles.container}>
-      <View style={{flexDirection: "row", marginTop: 20,marginBottom: -20}}>
+      <View style={{flexDirection: "row", marginTop: 20}}>
         <View style={styles.headerDivider} />
           <Text style={styles.mainHeader}>
          Calendar<Text style={{fontWeight: "300", color: '#009688'}}></Text>
           </Text>
         <View style={styles.headerDivider} />
       </View>
-      <View style={{flex: 1, marginTop:30,}}>
+      <View style={{flex: 1, heigth: 500}}>
         <Agenda
           items={this.state.myItems.HHSziHpW6yHi73o6PvMc}
-          loadItemsForMonth={this.loadItems.bind(this)}
+          //loadItemsForMonth={this.loadItems.bind(this)}
           selected={Date()}
           renderItem={this.renderItem.bind(this)}
-          onDayPress={(day) => {this.setState({selectedDay: day.dateString})}} //console.log('selected day', day)
+          onDayPress={(day) => {this.setState({selectedDay: day.dateString})}}
           renderEmptyData={() => {return (<View><Text style={{alignSelf: 'center', marginTop: 15}}>No events for this day.</Text></View>);}}
-          //firstDay={1}
+          firstDay={1}
+          rowHasChanged={(r1, r2) => {return r1.text !== r2.text}}
           />
           <Fab
             active={this.state.active}
