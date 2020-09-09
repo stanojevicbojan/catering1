@@ -1,11 +1,19 @@
 import React, { Component } from 'react';
-import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, Alert, ActivityIndicator, Modal, Animated } from 'react-native';
+import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, Alert, ActivityIndicator, Modal, Animated, Image } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import firebase from '../database/firebaseDb';
 import { Table, TableWrapper, Cell, Row, Rows, Col } from 'react-native-table-component';
 import colors from '../Colors'
 import { Ionicons } from '@expo/vector-icons'
 import {Icon, Fab } from 'native-base';
+import ViewShot, {captureRef} from 'react-native-view-shot';
+import * as WebBrowser from 'expo-web-browser';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+import * as Permissions from 'expo-permissions';
+
+
+
 console.disableYellowBox = true;
 export default class Checklist extends React.Component {
   constructor(props) {
@@ -27,7 +35,8 @@ export default class Checklist extends React.Component {
         loading: true,
         modalVisible: false,
         colHeightArr: [],
-        newCenterCheckmarks: {}
+        newCenterCheckmarks: {},
+        uri: ''
       }
 
     }
@@ -52,7 +61,14 @@ export default class Checklist extends React.Component {
         });
     }
 
-  componentDidMount() {
+  async componentDidMount() {
+    const permission = await Permissions.getAsync(Permissions.CAMERA_ROLL);
+  if (permission.status !== 'granted') {
+      const newPermission = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+      if (newPermission.status === 'granted') {
+        //its granted.
+      }
+  }
     this.listener = firebase.firestore().collection('checklist').orderBy('created').onSnapshot(snap => {
       const myItems = {};
       const tableTitle = [];
@@ -242,6 +258,33 @@ foodButton = (header) => (
   </View>
 );
 
+
+onImageLoad = (uri) => {
+  this.refs.viewShot.capture().then(uri => {
+    console.log("do something with ", uri);
+    //MediaLibrary.saveToLibraryAsync(uri)
+    this.setState({
+      uri: uri
+    })
+    this.uploadImage(uri, `img${Math.random()}`)
+    .then(() => {
+      Alert.alert("success");
+    })
+    .catch((error) => {
+      Alert.alert(error);
+    })
+  })
+
+};
+
+uploadImage = async (uri, imageName) => {
+  const response = await fetch(uri);
+  const blob = await response.blob();
+
+  var ref = firebase.storage().ref().child("images/" + imageName)
+  return ref.put(blob)
+}
+
   render () {
     if (this.state.loading) {
       return (
@@ -274,6 +317,7 @@ foodButton = (header) => (
 
     return (
       <View style={styles.container}>
+        {console.log(this.state.uri)}
         <Modal
           animationType="slide"
           transparent={true}
@@ -284,6 +328,11 @@ foodButton = (header) => (
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
+            <Image
+        source={{uri: this.state.uri}}
+        resizeMode={'contain'}
+        style={styles.snapshot}
+      />
             <TouchableHighlight
                 style={{ ...styles.openButton, backgroundColor: "#3f51b5", justifyContent: 'flex-start', alignItems: 'flex-end', alignSelf: 'flex-start', borderRadius: 10}}
                 onPress={() => {
@@ -328,6 +377,7 @@ foodButton = (header) => (
         <View style={styles.container1}>
           <View style={{flexDirection: "row", marginTop: -10,}}>
             <View style={styles.divider} />
+              <Button onPress={this.onImageLoad}>Take Snapshot</Button>
               <Text style={styles.header}>
              Check<Text style={{fontWeight: "300", color: '#2196f3'}}>List</Text>
               </Text>
@@ -337,11 +387,12 @@ foodButton = (header) => (
             <View style={styles.container}>
               {/* borderStyle={{borderWidth: 1}} */}
               <Table>
+                <ScrollView style={{height:490}}>
+                <ViewShot ref="viewShot">
                 <TableWrapper>
                   {/* ako nesto ne bude radilo vrati ovo i uvezi sa firebase! widthArr={state.widthArr}  */}
                 <Row  data={state.newTableHead} style={styles.head} textStyle={styles.text} widthArr={state.widthArr}/>
                 </TableWrapper>
-                <ScrollView style={{height:490}}>
                 {
                   state.tableData.map((rowData, index) => (
                     <TableWrapper key={index} style={styles.wrapper}>
@@ -357,6 +408,7 @@ foodButton = (header) => (
                     </TableWrapper>
                   ))
                  }
+                  </ViewShot>
                 </ScrollView>
               </Table>
             </View>
@@ -382,15 +434,15 @@ foodButton = (header) => (
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 6, paddingTop: 20, backgroundColor: '#fff', paddingRight: 0,paddingBottom: 0 },
-  container1: { flex: 1, padding: 3, paddingTop: 3, backgroundColor: '#fff', borderColor: 'black',paddingRight: 0},
+  container: { flex: 1, padding: 6, paddingTop: 20, paddingRight: 0,paddingBottom: 0 },
+  container1: { flex: 1, padding: 3, paddingTop: 3, borderColor: 'black',paddingRight: 0},
   head: {  height: 60, backgroundColor: '#3f51b5'},
-  wrapper: { flexDirection: 'row', marginLeft: 0,},
-  title: { flex: 1, backgroundColor: 'black', width: 200,},
-  textCol: {textAlign: 'center', fontWeight: '700', color: '#474747'},
+  wrapper: { flexDirection: 'row', marginLeft: 0, backgroundColor: 'white'},
+  title: { flex: 1, width: 200,},
+  textCol: {textAlign: 'center', fontWeight: '700'},
   row: {  height: 20},
   text: { textAlign: 'center', color: 'white', fontWeight: '700'}, //, marginLeft: 50
-  columnText: {textAlign: 'center', color: 'black', fontWeight: '700', alignSelf: 'center', flex: 1},
+  columnText: {textAlign: 'center', color: 'grey', fontWeight: '700', alignSelf: 'center', flex: 1},
   checkmark: { alignSelf: 'center'},
   cell: {height: 60, width: 200, borderBottomWidth: 0.5, borderBottomColor: colors.lightBlue },
   divider: {
