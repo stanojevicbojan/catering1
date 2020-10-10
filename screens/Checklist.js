@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, Alert, ActivityIndicator, Modal, Animated, Image } from 'react-native';
+import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, Alert, ActivityIndicator, Modal, Animated, Image, SafeAreaView, FlatList} from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import firebase from '../database/firebaseDb';
 import { Table, TableWrapper, Cell, Row, Rows, Col } from 'react-native-table-component';
@@ -11,6 +11,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import * as Permissions from 'expo-permissions';
+import { Linking } from 'expo';
 
 
 
@@ -34,9 +35,12 @@ export default class Checklist extends React.Component {
         numOfCols: [],
         loading: true,
         modalVisible: false,
+        modalSettingsVisible: false,
         colHeightArr: [],
         newCenterCheckmarks: {},
-        uri: ''
+        uri: '',
+        images: [],
+        imageList: [],
       }
 
     }
@@ -102,7 +106,23 @@ export default class Checklist extends React.Component {
       this.setState({colHeightArr, widthArr})
     })
 
+
+
+
+    // Find all the prefixes and items.
+    this.getImageName = firebase.storage().ref('images').listAll().then(res => {
+      let images = []
+      res.items.forEach(function(itemRef) {
+        // All the items under listRef.
+        images.push(itemRef.name)
+      });
+      this.setState({
+        images
+      })
+    });
     
+    // Since you mentioned your images are in a folder,
+    // we'll create a Reference to that folder:
 }  
 
   componentWillUnmount() {
@@ -112,6 +132,10 @@ export default class Checklist extends React.Component {
 
 setModalVisible = (visible) => {
   this.setState({ modalVisible: visible });
+}
+
+setModalSettingsVisible = (visible) => {
+  this.setState({ modalSettingsVisible: visible });
 }
 
 confirmationMessage = () => {
@@ -275,7 +299,20 @@ onImageLoad = (uri) => {
     })
   })
 
+
 };
+
+getFileURL = async () => {
+  let imageList = []
+  for (let i = 0; i < this.state.images.length; i++) {
+  const ref = firebase.storage().ref(`images/${this.state.images[i]}`);
+  const url = await ref.getDownloadURL();
+  imageList.push(url)
+  }
+  this.setState({
+    imageList
+  })
+}
 
 uploadImage = async (uri, imageName) => {
   const response = await fetch(uri);
@@ -294,6 +331,7 @@ uploadImage = async (uri, imageName) => {
       )
     }
     const { modalVisible } = this.state;
+    const { modalSettingsVisible } = this.state;
     const itemInput = this.state.itemInput
     const centerInput = this.state.centerInput
     const state = this.state;
@@ -315,9 +353,24 @@ uploadImage = async (uri, imageName) => {
       </View>
     );
 
+    const renderItem = ({ item }) => (
+      <View >
+        <ScrollView horizontal={true}>
+          <TouchableOpacity 
+            style={{marginBottom: 20, marginTop: 20,}}
+            onPress={() =>   Linking.openURL(item)}>
+            <Image
+            style={{width: 1000, height: 600, }}
+            source={{uri: `${item}`}}
+            />
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+      
+    );
+
     return (
       <View style={styles.container}>
-        {console.log(this.state.uri)}
         <Modal
           animationType="slide"
           transparent={true}
@@ -328,11 +381,6 @@ uploadImage = async (uri, imageName) => {
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-            <Image
-        source={{uri: this.state.uri}}
-        resizeMode={'contain'}
-        style={styles.snapshot}
-      />
             <TouchableHighlight
                 style={{ ...styles.openButton, backgroundColor: "#3f51b5", justifyContent: 'flex-start', alignItems: 'flex-end', alignSelf: 'flex-start', borderRadius: 10}}
                 onPress={() => {
@@ -359,6 +407,39 @@ uploadImage = async (uri, imageName) => {
               />
               <Button style={{flex: 2, height: 50, padding: 2, marginLeft: 3,}} mode="contained" onPress={() => this.addCenter()}><Text>Add center</Text></Button>
             </View>
+
+
+            </View>
+          </View>
+        </Modal>
+
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalSettingsVisible}
+          onRequestClose={() => {
+            Alert.alert("Modal has been closed.");
+          }}
+        >
+          <View style={styles.centeredView}>
+            
+            <View style={styles.modalView}>
+            <TouchableHighlight
+                style={{ ...styles.openButton, backgroundColor: "#3f51b5", justifyContent: 'flex-start', alignItems: 'flex-end', alignSelf: 'flex-start', borderRadius: 10}}
+                onPress={() => {
+                  this.setModalSettingsVisible(!modalSettingsVisible);
+                }}
+              >
+                <Text style={styles.textStyle}>Close</Text>
+              </TouchableHighlight>
+              <SafeAreaView style={{flex: 1, marginTop: 10}}>
+                <FlatList
+                  data={this.state.imageList}
+                  renderItem={renderItem}
+                  keyExtractor={item => item}
+                />
+              </SafeAreaView>
             <View style={{flexDirection: 'row'}}>
               <TouchableHighlight
                 style={{ ...styles.openButton, backgroundColor: "red", alignSelf: 'flex-start' }}
@@ -368,19 +449,24 @@ uploadImage = async (uri, imageName) => {
               >
                 <Text style={styles.textStyle}>Reset checklist</Text>
               </TouchableHighlight>
+
             </View>
 
             </View>
           </View>
         </Modal>
 
+
+
         <View style={styles.container1}>
           <View style={{flexDirection: "row", marginTop: -10,}}>
             <View style={styles.divider} />
-              <Button onPress={this.onImageLoad}>Take Snapshot</Button>
+              <Ionicons style={{marginTop: 10}} name="md-settings" size={34} color="black" onPress={() => {this.setModalSettingsVisible(true); this.getFileURL()}}
+              />
               <Text style={styles.header}>
              Check<Text style={{fontWeight: "300", color: '#2196f3'}}>List</Text>
               </Text>
+              <Button onPress={this.onImageLoad}>Take Snapshot</Button>
             <View style={styles.divider} />
           </View>
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
