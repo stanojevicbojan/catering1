@@ -10,7 +10,6 @@ const firebaseConfig = {
     messagingSenderId: "704821076290",
     appId: "1:704821076290:web:699e0f4c2314c33004e8db",
     measurementId: "G-N570BST9M0"
-
 };
 
 class FireMenu {
