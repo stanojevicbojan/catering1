@@ -464,7 +464,7 @@ uploadImage = async (uri, imageName) => {
               <Ionicons style={{marginTop: 10}} name="md-settings" size={34} color="black" onPress={() => {this.setModalSettingsVisible(true); this.getFileURL()}}
               />
               <Text style={styles.header}>
-             Check Yes<Text style={{fontWeight: "300", color: '#2196f3'}}>List</Text>
+             Check Fine<Text style={{fontWeight: "300", color: '#2196f3'}}>List</Text>
               </Text>
               <Button onPress={this.onImageLoad}>Take Snapshot</Button>
             <View style={styles.divider} />
