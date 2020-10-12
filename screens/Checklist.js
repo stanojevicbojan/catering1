@@ -41,6 +41,7 @@ export default class Checklist extends React.Component {
         uri: '',
         images: [],
         imageList: [],
+        imageData: [],
       }
 
     }
@@ -112,6 +113,8 @@ export default class Checklist extends React.Component {
     // Find all the prefixes and items.
     this.getImageName = firebase.storage().ref('images').listAll().then(res => {
       let images = []
+      
+      
       res.items.forEach(function(itemRef) {
         // All the items under listRef.
         images.push(itemRef.name)
@@ -119,11 +122,41 @@ export default class Checklist extends React.Component {
       this.setState({
         images
       })
+      this.gettingMetadata();
     });
+
     
     // Since you mentioned your images are in a folder,
     // we'll create a Reference to that folder:
 }  
+
+gettingMetadata = async () => {
+  // Get metadata properties
+  //console.log(this.state.imageList)
+  let imageData = []
+
+    for (let i = 0; i < this.state.images.length; i++) {
+
+    const ref = firebase.storage().ref(`images/${this.state.images[i]}`);
+    const url = await ref.getDownloadURL();
+    
+
+   firebase.storage().ref(`images/${this.state.images[i]}`).getMetadata().then(function(metadata) {
+    // Metadata now contains the metadata for 'images/forest.jpg'
+     //console.log(metadata)
+     imageData.push({
+       url: url,
+       date: metadata.timeCreated
+      })
+  }).catch(function(error) {
+    // Uh-oh, an error occurred!
+  });
+}
+
+  this.setState({
+    imageData
+  })
+  }
 
   componentWillUnmount() {
     this.listener();
@@ -137,6 +170,8 @@ setModalVisible = (visible) => {
 setModalSettingsVisible = (visible) => {
   this.setState({ modalSettingsVisible: visible });
 }
+
+
 
 confirmationMessage = () => {
     Alert.alert(
@@ -354,17 +389,12 @@ uploadImage = async (uri, imageName) => {
     );
 
     const renderItem = ({ item }) => (
-      <View >
-        <ScrollView horizontal={true}>
+      <View style={{borderBottomColor: 'black', borderBottomWidth: 0.5,}}>
           <TouchableOpacity 
             style={{marginBottom: 20, marginTop: 20,}}
-            onPress={() =>   Linking.openURL(item)}>
-            <Image
-            style={{width: 1000, height: 600, }}
-            source={{uri: `${item}`}}
-            />
+            onPress={() =>   Linking.openURL(item.url)}>
+            <Text >{item.date}</Text>
           </TouchableOpacity>
-        </ScrollView>
       </View>
       
     );
@@ -422,25 +452,31 @@ uploadImage = async (uri, imageName) => {
             Alert.alert("Modal has been closed.");
           }}
         >
-          <View style={styles.centeredView}>
+          <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
             
             <View style={styles.modalView}>
-            <TouchableHighlight
-                style={{ ...styles.openButton, backgroundColor: "#3f51b5", justifyContent: 'flex-start', alignItems: 'flex-end', alignSelf: 'flex-start', borderRadius: 10}}
+              <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+            <TouchableOpacity
+                style={{ justifyContent: 'flex-start', alignItems: 'flex-end', alignSelf: 'flex-start'}}
                 onPress={() => {
                   this.setModalSettingsVisible(!modalSettingsVisible);
                 }}
               >
-                <Text style={styles.textStyle}>Close</Text>
-              </TouchableHighlight>
-              <SafeAreaView style={{flex: 1, marginTop: 10}}>
+                <Ionicons name="ios-close" size={60} color="black" />
+              </TouchableOpacity>
+              <Text style={{marginLeft: 40, fontWeight: '400', fontSize: 16, justifyContent: 'center', alignItems: 'center'}}>Last 30 days</Text>
+              </View>
+              <SafeAreaView style={{flex: 1, marginTop: 10, justifyContent: 'center', alignItems: 'center', alignSelf: 'center'}}>
                 <FlatList
-                  data={this.state.imageList}
+                  data={this.state.imageData.sort((a,b) => b.date.localeCompare(a.date))}
                   renderItem={renderItem}
-                  keyExtractor={item => item}
+                  keyExtractor={item => item.url}
+                  showsVerticalScrollIndicator={false}
                 />
               </SafeAreaView>
+              
             <View style={{flexDirection: 'row'}}>
+              <Button onPress={this.onImageLoad}>Close Day</Button>
               <TouchableHighlight
                 style={{ ...styles.openButton, backgroundColor: "red", alignSelf: 'flex-start' }}
                 onPress={() => {
@@ -457,17 +493,15 @@ uploadImage = async (uri, imageName) => {
         </Modal>
 
 
-
         <View style={styles.container1}>
-          <View style={{flexDirection: "row", marginTop: -10,}}>
-            <View style={styles.divider} />
-              <Ionicons style={{marginTop: 10}} name="md-settings" size={34} color="black" onPress={() => {this.setModalSettingsVisible(true); this.getFileURL()}}
+          <View style={{flexDirection: "row", marginTop: 10,}}>
+            <View />
+              <Ionicons style={{marginTop: 10, marginLeft: 10}} name="md-settings" size={34} color="black" onPress={() => {this.setModalSettingsVisible(true); this.getFileURL(); }}
               />
               <Text style={styles.header}>
              Check <Text style={{fontWeight: "300", color: '#2196f3'}}>List</Text>
               </Text>
-              <Button onPress={this.onImageLoad}>Take Snapshot</Button>
-            <View style={styles.divider} />
+            <View  />
           </View>
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
             <View style={styles.container}>
