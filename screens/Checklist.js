@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, Alert, ActivityIndicator, Modal, Animated, Image, SafeAreaView, FlatList} from 'react-native';
+import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, Alert, ActivityIndicator, Modal, Animated, Image, SafeAreaView, FlatList, RefreshControl} from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import firebase from '../database/firebaseDb';
 import { Table, TableWrapper, Cell, Row, Rows, Col } from 'react-native-table-component';
@@ -42,9 +42,14 @@ export default class Checklist extends React.Component {
         images: [],
         imageList: [],
         imageData: [],
+        refreshing: false
       }
 
     }
+
+    onRefresh() {
+      setTimeout(() => this.refreshingHistory(), 3000);
+  }
 
     _alertIndex(index, cellIndex) {
       //Alert.alert(`This is row ${this.state.tableTitle[index]}, while column is ${this.state.tableHead[cellIndex + 1]}`);
@@ -130,6 +135,22 @@ export default class Checklist extends React.Component {
     // we'll create a Reference to that folder:
 }  
 
+refreshingHistory = () => {
+  this.getImageName = firebase.storage().ref('images').listAll().then(res => {
+    let images = []
+    
+    
+    res.items.forEach(function(itemRef) {
+      // All the items under listRef.
+      images.push(itemRef.name)
+    });
+    this.setState({
+      images
+    })
+    this.gettingMetadata();
+  });
+}
+
 gettingMetadata = async () => {
   // Get metadata properties
   //console.log(this.state.imageList)
@@ -146,7 +167,7 @@ gettingMetadata = async () => {
      //console.log(metadata)
      imageData.push({
        url: url,
-       date: metadata.timeCreated
+       date: metadata.timeCreated.replace("T", ", ").slice(0, 20)
       })
   }).catch(function(error) {
     // Uh-oh, an error occurred!
@@ -457,17 +478,22 @@ uploadImage = async (uri, imageName) => {
             <View style={styles.modalView}>
               <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
             <TouchableOpacity
-                style={{ justifyContent: 'flex-start', alignItems: 'flex-end', alignSelf: 'flex-start'}}
+                style={{ justifyContent: 'flex-start', alignItems: 'flex-end', alignSelf: 'flex-start', flex: 1,}}
                 onPress={() => {
                   this.setModalSettingsVisible(!modalSettingsVisible);
                 }}
               >
                 <Ionicons name="ios-close" size={60} color="black" />
               </TouchableOpacity>
-              <Text style={{marginLeft: 40, fontWeight: '400', fontSize: 16, justifyContent: 'center', alignItems: 'center'}}>Last 30 days</Text>
+              <Text style={{flex: 2, marginLeft: 40, fontWeight: '400', fontSize: 16, justifyContent: 'center', alignItems: 'center'}}>Last 30 days</Text>
               </View>
               <SafeAreaView style={{flex: 1, marginTop: 10, justifyContent: 'center', alignItems: 'center', alignSelf: 'center'}}>
                 <FlatList
+                  refreshControl={
+                  <RefreshControl
+                      refreshing={this.state.refreshing}
+                      onRefresh={this.onRefresh.bind(this)}
+                  />}
                   data={this.state.imageData.sort((a,b) => b.date.localeCompare(a.date))}
                   renderItem={renderItem}
                   keyExtractor={item => item.url}
@@ -475,7 +501,7 @@ uploadImage = async (uri, imageName) => {
                 />
               </SafeAreaView>
               
-            <View style={{flexDirection: 'row'}}>
+            <View style={{flexDirection: 'row', marginTop: 10,}}>
               <Button onPress={this.onImageLoad}>Close Day</Button>
               <TouchableHighlight
                 style={{ ...styles.openButton, backgroundColor: "red", alignSelf: 'flex-start' }}
