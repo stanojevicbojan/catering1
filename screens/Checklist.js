@@ -42,7 +42,8 @@ export default class Checklist extends React.Component {
         images: [],
         imageList: [],
         imageData: [],
-        refreshing: false
+        refreshing: false,
+        usersTokens: [],
       }
 
     }
@@ -72,6 +73,7 @@ export default class Checklist extends React.Component {
     }
 
   async componentDidMount() {
+    this.getAllTokens()
     const permission = await Permissions.getAsync(Permissions.CAMERA_ROLL);
   if (permission.status !== 'granted') {
       const newPermission = await Permissions.askAsync(Permissions.CAMERA_ROLL);
@@ -378,6 +380,51 @@ uploadImage = async (uri, imageName) => {
   return ref.put(blob)
 }
 
+//get tokens to send push notification
+getAllTokens = () => {
+  //get all available tokens
+  const docRef = firebase.firestore().collection('notifications').doc('pushTokens').get().then((doc) => {
+          if (doc.exists) {
+              const {
+                  tokens
+              } = doc.data();
+              
+              this.setState({
+              usersTokens: tokens
+              })
+          } else {
+              // doc.data() will be undefined in this case
+              console.log("No such document found!");
+          }
+      }).catch(function (error) {
+          console.log("Error getting document:", error);
+      });
+} 
+
+//sends push notification on closing the day
+sendPushNotification = async () => {
+  for (let i = 0; i < this.state.usersTokens.length; i++) {
+      const message = {
+          to: this.state.usersTokens[i],
+          sound: 'default',
+          title: 'Day closed',
+          body: 'Checklist for today has been closed and saved to history!',
+          data: { data: 'goes here' },
+          };
+          
+          await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+              Accept: 'application/json',
+              'Accept-encoding': 'gzip, deflate',
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(message),
+          });
+  }
+  console.log(this.state.usersTokens)
+} 
+
   render () {
     if (this.state.loading) {
       return (
@@ -502,7 +549,7 @@ uploadImage = async (uri, imageName) => {
               </SafeAreaView>
               
             <View style={{flexDirection: 'row', marginTop: 10,}}>
-              <Button onPress={this.onImageLoad}>Close Day</Button>
+              <Button onPress={() => {this.onImageLoad(); this.sendPushNotification()}}>Close Day</Button>
               <TouchableHighlight
                 style={{ ...styles.openButton, backgroundColor: "red", alignSelf: 'flex-start' }}
                 onPress={() => {
