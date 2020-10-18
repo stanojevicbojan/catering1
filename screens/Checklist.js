@@ -207,16 +207,16 @@ confirmationMessage = () => {
     );
   }
 
-resetConfirmation = () => {
+resetConfirmation = (functionToRun, stringExplanation) => {
   Alert.alert(
     "Are you sure?",
-    "This will set the entire checklist to unchecked.",
+    `This will ${stringExplanation}`,
     [{
       text: "Cancel",
       onPress: () => console.log("Cancel Pressed"),
       style: "cancel"
     },
-      { text: "Yes", onPress: () => this.resetChecklist() }
+      { text: "Yes", onPress: () => functionToRun() }
     ],
     { cancelable: false }
   );
@@ -357,7 +357,7 @@ onImageLoad = (uri) => {
     })
   })
 
-
+  this.sendPushNotification()
 };
 
 getFileURL = async () => {
@@ -549,11 +549,15 @@ sendPushNotification = async () => {
               </SafeAreaView>
               
             <View style={{flexDirection: 'row', marginTop: 10,}}>
-              <Button onPress={() => {this.onImageLoad(); this.sendPushNotification()}}>Close Day</Button>
+              <Button 
+                onPress={() => {
+                  this.resetConfirmation(this.onImageLoad, "save checklist for this day.")
+              }}
+                >End Day</Button>
               <TouchableHighlight
                 style={{ ...styles.openButton, backgroundColor: "red", alignSelf: 'flex-start' }}
                 onPress={() => {
-                  this.resetConfirmation();
+                  this.resetConfirmation(this.resetChecklist, "reset checklist and remove all checkmarks.");
                 }}
               >
                 <Text style={styles.textStyle}>Reset checklist</Text>
