@@ -106,13 +106,17 @@ class CentersScreen extends Component {
                   key={i}
                   chevron
                   bottomDivider
-                  title={item.name}
+                  title={
+                    <View>
+                      <Text style={{fontWeight: 'bold'}}>{item.name}</Text>
+                    </View>
+                  }
                   subtitle={
                     <View>
                       <Text>Phone: {item.phone}</Text>
-                      <Text>AM: {item.am}</Text>
-                      <Text>Lunch: {item.lunch}</Text>
-                      <Text>PM: {item.pm}</Text>
+                      <Text style={{color: '#4b52bd', fontWeight: 'bold'}}>AM: {item.am}</Text>
+                      <Text style={{color: '#ef1635', fontWeight: 'bold'}}>Lunch: {item.lunch}</Text>
+                      <Text style={{color: '#65aef2', fontWeight: 'bold'}}>PM: {item.pm}</Text>
                     </View>
                   }
                   onPress={() => {

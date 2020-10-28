@@ -11,6 +11,7 @@ class UserDetailScreen extends Component {
     super();
     this.state = {
       name: '',
+      school: '',
       email: '',
       mobile: '',
       isLoading: true
@@ -28,6 +29,7 @@ class UserDetailScreen extends Component {
         this.setState({
           key: res.id,
           name: user.name,
+          school: user.school,
           email: user.email,
           mobile: user.mobile,
           isLoading: false
@@ -51,12 +53,14 @@ class UserDetailScreen extends Component {
     const updateDBRef = firebase.firestore().collection('contacts').doc(this.state.key);
     updateDBRef.set({
       name: this.state.name,
+      school: this.state.school,
       email: this.state.email,
       mobile: this.state.mobile,
     }).then((docRef) => {
       this.setState({
         key: '',
         name: '',
+        school: '',
         email: '',
         mobile: '',
         isLoading: false,
@@ -110,6 +114,13 @@ class UserDetailScreen extends Component {
               placeholder={'Name'}
               value={this.state.name}
               onChangeText={(val) => this.inputValueUpdate(val, 'name')}
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <TextInput
+              placeholder={'School'}
+              value={this.state.school}
+              onChangeText={(val) => this.inputValueUpdate(val, 'school')}
           />
         </View>
         <View style={styles.inputGroup}>

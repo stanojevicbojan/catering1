@@ -73,7 +73,7 @@ class CenterDetailScreen extends Component {
             to: this.state.usersTokens[i],
             sound: 'default',
             title: 'Center update',
-            body: 'Center numbers were just updated!',
+            body: `Numbers for ${this.state.name} were just updated!`,
             data: { data: 'goes here' },
             };
             

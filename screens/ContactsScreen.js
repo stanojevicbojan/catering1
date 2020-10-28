@@ -37,11 +37,12 @@ class ContactsScreen extends Component {
     const allEmails = []
     const userArr = [];
     querySnapshot.forEach((res) => {
-      const { name, email, mobile } = res.data();
+      const { name, school, email, mobile } = res.data();
       userArr.push({
         key: res.id,
         res,
         name,
+        school,
         email,
         mobile,
       });
@@ -83,7 +84,12 @@ class ContactsScreen extends Component {
                   chevron
                   bottomDivider
                   title={item.name}
-                  subtitle={item.mobile}
+                  subtitle={
+                    <View>
+                      <Text style={{fontStyle: 'italic', fontWeight: '300'}}>{item.mobile}</Text>
+                      <Text style={{fontWeight: 'bold'}}>{item.school}</Text>
+                    </View>
+                    }
                   onPress={() => {
                     this.props.navigation.navigate('UserDetailScreen', {
                       userkey: item.key

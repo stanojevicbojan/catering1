@@ -5,6 +5,7 @@ import firebase from '../database/firebaseDb';
 import { Table, TableWrapper, Cell, Row, Rows, Col } from 'react-native-table-component';
 import colors from '../Colors'
 import { Ionicons } from '@expo/vector-icons'
+import { MaterialIcons } from '@expo/vector-icons'; 
 import {Icon, Fab } from 'native-base';
 import ViewShot, {captureRef} from 'react-native-view-shot';
 import * as WebBrowser from 'expo-web-browser';
@@ -12,7 +13,7 @@ import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import * as Permissions from 'expo-permissions';
 import { Linking } from 'expo';
-
+import NumericInput from 'react-native-numeric-input'
 
 
 console.disableYellowBox = true;
@@ -44,6 +45,7 @@ export default class Checklist extends React.Component {
         imageData: [],
         refreshing: false,
         usersTokens: [],
+        groupCounter: 2,
       }
 
     }
@@ -56,6 +58,7 @@ export default class Checklist extends React.Component {
       //Alert.alert(`This is row ${this.state.tableTitle[index]}, while column is ${this.state.tableHead[cellIndex + 1]}`);
       let toggle = !this.state.tableData[index][cellIndex]
       let name = "checkmark.".concat(this.state.tableHead[cellIndex + 1])
+      console.log(name)
       let checkboxUpdate = firebase.firestore().collection('checklist')
       checkboxUpdate.where("name", "==", this.state.tableTitle[index])
         .get()
@@ -235,17 +238,18 @@ resetChecklist = () => {
 
 addCenter = () => {
 
-
-  firebase.firestore().collection("checklist").doc(this.state.centerInput).set({
+for (let i = 1; i <= this.state.groupCounter; i++ ) {
+  firebase.firestore().collection("checklist").doc(`${this.state.centerInput}-Group ${i}`).set({
     checkmark: this.state.newCenterCheckmarks,
     id: this.state.centerInput,
-    name: this.state.centerInput,
+    name: `${this.state.centerInput}-Group ${i}`,
     created: firebase.firestore.Timestamp.now()
   })
   .catch(function(error) {
       console.error("Error writing document: ", error);
   });
-  this.setState({centerInput:''})
+}
+  this.setState({centerInput:'', groupCounter: 2})
   this.confirmationMessage()
 }
 
@@ -440,9 +444,8 @@ sendPushNotification = async () => {
     const state = this.state;
     //this._alertIndex(index, cellIndex)
     const element = (data, index, cellIndex) => (
-    
-      <TouchableOpacity onPress={() => this._alertIndex(index, cellIndex)  }>
-          <Ionicons style={styles.checkmark} name={this.state.tableData[index][cellIndex] == false ? 'ios-square-outline' : 'md-checkbox'} size={25} color={colors.gray} />
+      <TouchableOpacity onPress={() => this._alertIndex(index, cellIndex)  } style={{marginLeft: 3, marginRight: 3}}>
+          <MaterialIcons style={styles.checkmark} name={this.state.tableData[index][cellIndex] == false ? 'check-box-outline-blank' : 'check-box'} size={20} color={colors.gray} />
       </TouchableOpacity>
     
     );
@@ -452,7 +455,7 @@ sendPushNotification = async () => {
         <TouchableOpacity style={{alignSelf: 'flex-start', flex: 1, paddingLeft: 30,}} onPress={() => this.deleteConfirmation(index)}>
             <Ionicons name={'md-more'} size={30} color={colors.gray} />
         </TouchableOpacity>
-        <Text style={styles.columnText}>{this.state.tableTitle[index]}</Text>
+        <Text style={{flex: 4, fontSize: 12,}}>{this.state.tableTitle[index]}</Text>
       </View>
     );
 
@@ -480,31 +483,52 @@ sendPushNotification = async () => {
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
             <TouchableHighlight
-                style={{ ...styles.openButton, backgroundColor: "#3f51b5", justifyContent: 'flex-start', alignItems: 'flex-end', alignSelf: 'flex-start', borderRadius: 10}}
+                style={{  backgroundColor: 'white', justifyContent: 'flex-start', alignItems: 'flex-end', alignSelf: 'flex-start', borderRadius: 10}}
                 onPress={() => {
                   this.setModalVisible(!modalVisible);
                 }}
               >
-                <Text style={styles.textStyle}>Close</Text>
+                <Ionicons name="ios-close" size={60} color="black" />
               </TouchableHighlight>
-            <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
+            <View style={{justifyContent: 'center', alignItems: 'center', alignSelf: 'center'}}>
+              <Text style={{fontSize: 16, fontWeight: '700', marginBottom: 10}}>Add new food item to the table</Text> 
+            </View>
+            <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15, marginBottom: 60}}>
               <TextInput
                 style={{flex: 6,height: 50,}}
-                label="New food"
+                label="Food name"
                 value={itemInput}
                 onChangeText={itemInput => this.setState({itemInput})}
               />
-              <Button style={{flex: 2, height: 50, padding: 2, marginLeft: 3,}} mode="contained" onPress={() => this.addFood()}><Text>Add food</Text></Button>
+              <Button style={{flex: 2, height: 50, padding: 2, marginLeft: 3,}} mode="contained" onPress={() => this.addFood()}><Text>Add</Text></Button>
             </View>
+            <View style={{justifyContent: 'center', alignItems: 'center', alignSelf: 'center'}}>
+              <Text style={{fontSize: 16, fontWeight: '700', marginBottom: 10}}>Add new center to the table</Text> 
+            </View>
+            <View style={{flexDirection: 'row', alignSelf: 'center', alignItems: 'center'}}>
+                <Text style={{marginRight: 5}}>How many groups in center?</Text> 
+                <NumericInput
+                  value={this.state.groupCounter} 
+                  leftButtonBackgroundColor={'#6200ed'} 
+                  rightButtonBackgroundColor={'#6200ed'} 
+                  rounded={true}
+                  iconStyle={{color: 'white'}}
+                  minValue={2} 
+                  maxValue={6} 
+                  onChange={groupCounter => this.setState({groupCounter})} 
+                  />
+              </View>
+              
             <View style={{flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start', margin: 15}}>
               <TextInput
                 style={{flex: 6,height: 50,}}
-                label="New center"
+                label="Center name"
                 value={centerInput}
                 onChangeText={centerInput => this.setState({centerInput})}
               />
-              <Button style={{flex: 2, height: 50, padding: 2, marginLeft: 3,}} mode="contained" onPress={() => this.addCenter()}><Text>Add center</Text></Button>
+              <Button style={{flex: 2, height: 50, padding: 2, marginLeft: 3,}} mode="contained" onPress={() => this.addCenter()}><Text>Add</Text></Button>
             </View>
+ 
 
 
             </View>
@@ -593,7 +617,7 @@ sendPushNotification = async () => {
                 {
                   state.tableData.map((rowData, index) => (
                     <TableWrapper key={index} style={styles.wrapper}>
-                      <Cell style={styles.cell} data={index >= 0 ? colElement(index) : state.tableTitle[index]} textStyle={styles.columnText} />
+                      <Cell style={styles.cell} data={index >= 0 ? colElement(index) : state.tableTitle[index]} textStyle={styles.centerText} />
                       {/*<Text>{console.log(rowData)}</Text> */}
                       {
                         rowData.map((cellData, cellIndex) => (
@@ -640,8 +664,9 @@ const styles = StyleSheet.create({
   row: {  height: 20},
   text: { textAlign: 'center', color: 'white', fontWeight: '700'}, //, marginLeft: 50
   columnText: {textAlign: 'center', color: 'grey', fontWeight: '700', alignSelf: 'center', flex: 1},
+  centerText: {textAlign: 'left', color: 'grey', fontWeight: '700', },
   checkmark: { alignSelf: 'center'},
-  cell: {height: 60, width: 200, borderBottomWidth: 0.5, borderBottomColor: colors.lightBlue },
+  cell: {height: 60, width: 200, borderBottomWidth: 0.5, borderBottomColor: colors.lightBlue},
   divider: {
       backgroundColor: colors.lightBlue,
       height: 1,

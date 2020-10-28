@@ -10,6 +10,7 @@ class AddUserScreen extends Component {
     this.dbRef = firebase.firestore().collection('contacts');
     this.state = {
       name: '',
+      school: '',
       email: '',
       mobile: '',
       isLoading: false
@@ -24,18 +25,20 @@ class AddUserScreen extends Component {
 
   storeUser() {
     if(this.state.name === ''){
-     alert('Fill at least your name!')
+     alert('Fill at least the contact name!')
     } else {
       this.setState({
         isLoading: true,
       });      
       this.dbRef.add({
         name: this.state.name,
+        school: this.state.school,
         email: this.state.email,
         mobile: this.state.mobile,
       }).then((res) => {
         this.setState({
           name: '',
+          school: '',
           email: '',
           mobile: '',
           isLoading: false,
@@ -66,6 +69,13 @@ class AddUserScreen extends Component {
               placeholder={'Name'}
               value={this.state.name}
               onChangeText={(val) => this.inputValueUpdate(val, 'name')}
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <TextInput
+              placeholder={'School'}
+              value={this.state.school}
+              onChangeText={(val) => this.inputValueUpdate(val, 'school')}
           />
         </View>
         <View style={styles.inputGroup}>
