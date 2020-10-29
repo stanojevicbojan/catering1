@@ -165,14 +165,47 @@ gettingMetadata = async () => {
 
     const ref = firebase.storage().ref(`images/${this.state.images[i]}`);
     const url = await ref.getDownloadURL();
-    
 
    firebase.storage().ref(`images/${this.state.images[i]}`).getMetadata().then(function(metadata) {
-    // Metadata now contains the metadata for 'images/forest.jpg'
-     //console.log(metadata)
+     //Converting to Edmonton time zone
+     var edmontonTime = metadata.timeCreated;
+     var firstIndex = 8;
+     var secondIndex = 11;
+     var convertHour = metadata.timeCreated.toString().slice(11, 13) - 6;
+     var convertDay = metadata.timeCreated.toString().slice(8, 10);
+     var convertMonth = metadata.timeCreated.toString().slice(5, 7);
+     if ( convertHour == "-6") {
+       convertDay = convertDay - 1
+       convertHour = "18"
+     } else if (convertHour == "-5") {
+       convertDay = convertDay - 1
+       convertHour = "19"
+     } else if (convertHour == "-4") {
+       convertDay = convertDay - 1
+       convertHour = "20"
+     } else if (convertHour == "-3") {
+      convertDay = convertDay - 1
+      convertHour = "21"
+     } else if (convertHour == "-2") {
+      convertHour = "22"
+      convertDay = convertDay - 1
+     } else if (convertHour == "-1") {
+       convertDay = convertDay - 1
+       convertHour = "23"
+     }
+     if (convertHour >= 0 && convertHour < 10) {
+       convertHour = "0".concat("", convertHour)
+     }
+     /* if need be. For each month, if condition should exist with concatination at the end
+     if (convertDay == "0" && convertMonth == "01" || convertMonth == "03" || convertMonth == "05" || convertMonth == "07" || convertMonth == "08" || convertMonth == "10" || convertMonth == "12" ) {
+       convertDay ==
+     }
+     */
+     edmontonTime = edmontonTime.substring(0, firstIndex) + convertDay + ", " + edmontonTime.substring(11, secondIndex) + convertHour + edmontonTime.substring(secondIndex + 2);
+
      imageData.push({
        url: url,
-       date: metadata.timeCreated.replace("T", ", ").slice(0, 20)
+       date: `Checklist for: ${edmontonTime.slice(0, 17)}`
       })
   }).catch(function(error) {
     // Uh-oh, an error occurred!
@@ -571,7 +604,6 @@ sendPushNotification = async () => {
                   showsVerticalScrollIndicator={false}
                 />
               </SafeAreaView>
-              
             <View style={{flexDirection: 'row', marginTop: 10,}}>
               <Button 
                 onPress={() => {
